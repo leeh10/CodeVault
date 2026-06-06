@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Edit Script - CodeVault</title>
+<title>View & Edit Script - CodeVault</title>
 
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
 
@@ -29,7 +29,6 @@ body{
     margin:auto;
 }
 
-/* Flexbox para poner el título y el botón de guardar alineados arriba */
 .header{
     display:flex;
     justify-content:space-between;
@@ -39,6 +38,11 @@ body{
 
 .title{
     font-size:36px;
+}
+
+.header-buttons{
+    display:flex;
+    gap:10px;
 }
 
 textarea{
@@ -52,6 +56,20 @@ textarea{
     resize:none;
     font-family:JetBrains Mono, monospace;
     font-size:14px;
+    transition: border-color 0.3s ease;
+}
+
+/* Modo Lectura */
+textarea:readonly {
+    color: #00cc6e;
+    cursor: default;
+    outline: none;
+}
+
+/* Modo Edición Activo */
+textarea:not(:readonly) {
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
 }
 
 .actions{
@@ -79,9 +97,16 @@ button:hover{
     color: white;
 }
 
-.btn-save-edit {
+/* Botones Superiores */
+.btn-edit {
     background: #0088ff;
     color: white;
+}
+
+.btn-save {
+    background: #00ff88;
+    color: black;
+    display: none; /* Oculto al principio */
 }
 
 .status{
@@ -98,18 +123,22 @@ button:hover{
 
 <div class="header">
     <h1 class="title">CodeVault</h1>
-    <!-- Botón de guardar cambios arriba de todo -->
-    <button class="btn-save-edit" onclick="updateScript()">
-        Save Changes
-    </button>
+    
+    <div class="header-buttons">
+        <button id="btnEdit" class="btn-edit" onclick="enableEdit()">
+            Edit
+        </button>
+        <button id="btnSave" class="btn-save" onclick="saveChanges()">
+            Save Changes
+        </button>
+    </div>
 </div>
 
 <div id="status" class="status">
     Loading script...
 </div>
 
-<!-- Cambiado de <pre> a <textarea> para que sea editable de inmediato -->
-<textarea id="code" placeholder="Loading code..."></textarea>
+<textarea id="code" placeholder="Loading code..." readonly></textarea>
 
 <div class="actions">
 
@@ -153,9 +182,8 @@ async function loadScript(){
 
         const currentCode = await response.text();
         
-        // Insertamos el código dentro del textarea para que el usuario pueda editarlo
         document.getElementById("code").value = currentCode;
-        document.getElementById("status").innerText = "Script loaded. You can edit it now.";
+        document.getElementById("status").innerText = "Script loaded (Read-Only)";
 
     }
     catch{
@@ -163,9 +191,22 @@ async function loadScript(){
     }
 }
 
-// Nueva función para actualizar el script en tu base de datos/backend
-async function updateScript(){
-    const updatedCode = document.getElementById("code").value;
+// 1. Al presionar EDIT: Oculta Editar, muestra Guardar y desbloquea el texto
+function enableEdit(){
+    const textarea = document.getElementById("code");
+    
+    textarea.readOnly = false; // Desbloquear
+    textarea.focus(); // Poner cursor listo para escribir
+
+    document.getElementById("btnEdit").style.display = "none";  // Ocultar botón Edit
+    document.getElementById("btnSave").style.display = "block"; // Mostrar botón Save Changes
+    document.getElementById("status").innerText = "Editing mode active...";
+}
+
+// 2. Al presionar SAVE CHANGES: Envía datos, vuelve al estado inicial si todo sale bien
+async function saveChanges(){
+    const textarea = document.getElementById("code");
+    const updatedCode = textarea.value;
 
     if(!updatedCode.trim()){
         alert("The script cannot be empty.");
@@ -173,10 +214,8 @@ async function updateScript(){
     }
 
     document.getElementById("status").innerText = "Saving changes...";
-
+    
     try {
-        // Asumiendo que tu API en Render soporta PUT/POST para actualizar usando el ID. 
-        // Si tu backend requiere una ruta diferente como /update, cámbiala aquí abajo.
         const response = await fetch(
             "https://codevault-gvyn.onrender.com/save", 
             {
@@ -185,20 +224,25 @@ async function updateScript(){
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    id: scriptId, // Le enviamos el mismo ID para sobrescribir o actualizar
+                    id: scriptId,
                     code: updatedCode
                 })
             }
         );
 
         if(response.ok) {
-            document.getElementById("status").innerText = "Changes saved successfully!";
+            textarea.readOnly = true; // Volver a bloquear código
+
+            document.getElementById("btnSave").style.display = "none"; // Ocultar Save Changes
+            document.getElementById("btnEdit").style.display = "block"; // Volver a mostrar Edit
+            
+            document.getElementById("status").innerText = "Changes saved successfully! (Read-Only)";
             alert("Changes saved!");
         } else {
             throw new Error();
         }
     } catch {
-        document.getElementById("status").innerText = "Error saving changes. Check backend configuration.";
+        document.getElementById("status").innerText = "Error saving changes.";
         alert("Failed to save changes.");
     }
 }
