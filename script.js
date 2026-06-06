@@ -23,9 +23,8 @@ async function saveScript(){
 
     const data = await response.json();
 
-    const url =
-location.origin +
-"/CodeVault/view.html?id=" +
+const url =
+"https://leeh10.github.io/CodeVault/view.html?id=" +
 data.id;
 
     const result =
