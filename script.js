@@ -24,9 +24,9 @@ async function saveScript(){
     const data = await response.json();
 
     const url =
-    location.origin +
-    "/view.html?id=" +
-    data.id;
+location.origin +
+"/CodeVault/view.html?id=" +
+data.id;
 
     const result =
     document.getElementById("result");
