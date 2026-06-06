@@ -16,11 +16,9 @@
   --muted: #555;
   --accent: #ffffff;
   --accent2: #c8c8c8;
-  --glow: rgba(255,255,255,0.04);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -32,7 +30,6 @@ body {
   position: relative;
 }
 
-/* ── CANVAS PARTICLES ── */
 #canvas {
   position: fixed;
   inset: 0;
@@ -40,7 +37,6 @@ body {
   pointer-events: none;
 }
 
-/* ── GRAIN OVERLAY ── */
 body::before {
   content:'';
   position:fixed;
@@ -52,7 +48,6 @@ body::before {
   opacity: 0.5;
 }
 
-/* ── LAYOUT ── */
 .container {
   position: relative;
   z-index: 2;
@@ -61,7 +56,7 @@ body::before {
   padding: 60px 24px 80px;
 }
 
-/* ── HEADER ── */
+/* HEADER */
 header {
   margin-bottom: 56px;
   animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
@@ -94,9 +89,7 @@ header {
   color: var(--text);
 }
 
-.logo span {
-  color: var(--muted);
-}
+.logo span { color: var(--muted); }
 
 .subtitle {
   font-family: 'JetBrains Mono', monospace;
@@ -106,7 +99,7 @@ header {
   padding-left: 52px;
 }
 
-/* ── EDITOR CARD ── */
+/* EDITOR CARD */
 .editor-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -116,11 +109,8 @@ header {
   transition: border-color 0.3s;
 }
 
-.editor-card:focus-within {
-  border-color: var(--border2);
-}
+.editor-card:focus-within { border-color: var(--border2); }
 
-/* topbar */
 .topbar {
   display: flex;
   align-items: center;
@@ -148,7 +138,6 @@ header {
   background: var(--border);
   padding: 3px 10px;
   border-radius: 20px;
-  letter-spacing: 0.05em;
 }
 
 .line-count {
@@ -169,19 +158,14 @@ textarea {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13.5px;
   line-height: 1.75;
-  letter-spacing: 0.01em;
   caret-color: white;
 }
 
-textarea::placeholder {
-  color: #333;
-}
-
+textarea::placeholder { color: #333; }
 textarea::-webkit-scrollbar { width: 6px; }
 textarea::-webkit-scrollbar-track { background: transparent; }
 textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-/* ── ACTIONS ── */
 .actions {
   display: flex;
   gap: 10px;
@@ -190,6 +174,7 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   background: var(--surface2);
 }
 
+/* BUTTONS */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -207,55 +192,36 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
 }
 
 .btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: white;
-  opacity: 0;
-  transition: opacity 0.15s;
-  border-radius: inherit;
+  content:'';
+  position:absolute;
+  inset:0;
+  background:white;
+  opacity:0;
+  transition:opacity 0.15s;
+  border-radius:inherit;
 }
 
 .btn:active::after { opacity: 0.1; }
+.btn svg { width:14px; height:14px; flex-shrink:0; }
 
-.btn-primary {
-  background: var(--text);
-  color: #080808;
-}
-
-.btn-primary:hover {
-  background: var(--accent2);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(255,255,255,0.1);
-}
+.btn-primary { background: var(--text); color: #080808; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,255,255,0.1); }
 
 .btn-ghost {
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border2);
 }
+.btn-ghost:hover { color: var(--text); border-color: #444; transform: translateY(-1px); }
 
-.btn-ghost:hover {
-  color: var(--text);
-  border-color: #444;
-  transform: translateY(-1px);
-}
-
-.btn svg {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-/* ── RESULT PANEL ── */
+/* RESULT */
 .result {
   margin-top: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 0;
-  display: none;
   overflow: hidden;
+  display: none;
   animation: fadeUp 0.4s cubic-bezier(.16,1,.3,1) both;
 }
 
@@ -271,7 +237,7 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   font-family: 'JetBrains Mono', monospace;
 }
 
-.result-header .status {
+.status-row {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -281,11 +247,6 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #3d3d3d;
-  transition: background 0.4s;
-}
-
-.status-dot.active {
   background: #4caf50;
   box-shadow: 0 0 8px #4caf5066;
   animation: pulse-dot 2s infinite;
@@ -293,43 +254,44 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
 
 @keyframes pulse-dot {
   0%,100% { box-shadow: 0 0 8px #4caf5066; }
-  50% { box-shadow: 0 0 16px #4caf5099; }
+  50%      { box-shadow: 0 0 16px #4caf5099; }
 }
 
-.result-body {
-  padding: 20px;
-}
+.result-body { padding: 20px; }
 
-/* Loadstring block */
-.loadstring-wrap {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  overflow: hidden;
+/* ROWS */
+.info-row {
   margin-bottom: 14px;
 }
 
-.loadstring-label {
+.row-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.1em;
-  padding: 10px 16px 8px;
-  border-bottom: 1px solid var(--border);
   text-transform: uppercase;
+  margin-bottom: 7px;
 }
 
-.loadstring-code {
+/* CODE BLOCK (shared style for URL and loadstring) */
+.code-block {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.code-block-text {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12.5px;
-  color: var(--accent2);
+  color: #aaa;
   padding: 14px 16px;
   word-break: break-all;
   line-height: 1.6;
   user-select: all;
 }
 
-.copy-loadstring-btn {
+.code-block-copy {
   width: 100%;
   background: transparent;
   border: none;
@@ -347,43 +309,26 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   gap: 7px;
 }
 
-.copy-loadstring-btn:hover {
-  background: var(--border);
-  color: var(--text);
-}
+.code-block-copy:hover { background: var(--border); color: var(--text); }
+.code-block-copy.copied { color: #4caf50; }
+.code-block-copy svg { width: 13px; height: 13px; }
 
-.copy-loadstring-btn.copied {
-  color: #4caf50;
-}
-
-.copy-loadstring-btn svg {
-  width: 13px;
-  height: 13px;
-}
-
-/* share row */
-.share-row {
-  display: flex;
+/* view link */
+.view-link-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   margin-top: 12px;
-}
-
-.share-url {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 10px 14px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
-/* ── TOAST ── */
+.view-link-btn:hover { color: var(--text); }
+
+/* TOAST */
 .toast {
   position: fixed;
   bottom: 30px;
@@ -403,18 +348,13 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   white-space: nowrap;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* ── ANIMATIONS ── */
 @keyframes fadeUp {
   from { opacity:0; transform: translateY(20px); }
   to   { opacity:1; transform: translateY(0); }
 }
 
-/* ── FOOTER ── */
 footer {
   margin-top: 48px;
   text-align: center;
@@ -466,67 +406,77 @@ footer {
         Copy Code
       </button>
       <button class="btn btn-ghost" onclick="clearEditor()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         Clear
       </button>
     </div>
   </div>
 
+  <!-- RESULT -->
   <div id="result" class="result">
     <div class="result-header">
-      <div class="status">
-        <div class="status-dot active" id="statusDot"></div>
+      <div class="status-row">
+        <div class="status-dot"></div>
         <span>Script saved</span>
       </div>
-      <span id="scriptId"></span>
+      <span id="scriptIdLabel"></span>
     </div>
     <div class="result-body">
 
-      <div class="loadstring-wrap">
-        <div class="loadstring-label">loadstring · ready to execute</div>
-        <div class="loadstring-code" id="loadstringCode"></div>
-        <button class="copy-loadstring-btn" id="copyLsBtn" onclick="copyLoadstring()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy Loadstring
-        </button>
+      <!-- RAW URL -->
+      <div class="info-row">
+        <div class="row-label">Raw URL</div>
+        <div class="code-block">
+          <div class="code-block-text" id="rawUrlText"></div>
+          <button class="code-block-copy" id="copyUrlBtn" onclick="copyRawUrl()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Raw URL
+          </button>
+        </div>
       </div>
 
-      <div class="share-row">
-        <div class="share-url" id="shareUrl"></div>
-        <button class="btn btn-ghost" onclick="copyUrl()" style="flex-shrink:0;font-size:12px;padding:10px 14px;">
-          Copy URL
-        </button>
+      <!-- LOADSTRING -->
+      <div class="info-row">
+        <div class="row-label">Loadstring · executor ready</div>
+        <div class="code-block">
+          <div class="code-block-text" id="loadstringText"></div>
+          <button class="code-block-copy" id="copyLsBtn" onclick="copyLoadstring()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Loadstring
+          </button>
+        </div>
       </div>
+
+      <!-- VIEW LINK -->
+      <a id="viewLink" class="view-link-btn" href="#" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open script page
+      </a>
 
     </div>
   </div>
 
   <footer>© 2026 CodeVault — all scripts encrypted at rest</footer>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="script.js"></script>
 <script>
-/* ─────────────────────────────────────────
-   PARTICLES
-───────────────────────────────────────── */
+/* ── PARTICLES ── */
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [];
+const ctx    = canvas.getContext('2d');
+let W, H;
 
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
 resize();
-window.addEventListener('resize', resize);
+addEventListener('resize', resize);
 
 class Particle {
   constructor() { this.reset(true); }
   reset(init) {
-    this.x  = Math.random() * W;
-    this.y  = init ? Math.random() * H : H + 10;
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : H + 10;
     this.vx = (Math.random() - 0.5) * 0.25;
     this.vy = -(Math.random() * 0.3 + 0.05);
     this.r  = Math.random() * 1.2 + 0.3;
@@ -535,138 +485,141 @@ class Particle {
     this.maxLife = Math.random() * 600 + 300;
   }
   update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life++;
+    this.x += this.vx; this.y += this.vy; this.life++;
     if (this.life > this.maxLife || this.y < -10) this.reset(false);
   }
   draw() {
-    const progress = this.life / this.maxLife;
-    const fade = progress < 0.1 ? progress / 0.1 : progress > 0.8 ? 1 - (progress - 0.8) / 0.2 : 1;
+    const p = this.life / this.maxLife;
+    const fade = p < 0.1 ? p/0.1 : p > 0.8 ? 1-(p-0.8)/0.2 : 1;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
     ctx.fillStyle = `rgba(255,255,255,${this.alpha * fade})`;
     ctx.fill();
   }
 }
 
-for (let i = 0; i < 130; i++) particles.push(new Particle());
+const particles = Array.from({length:130}, () => new Particle());
 
-/* connecting lines between nearby particles */
-function drawConnections() {
-  const maxDist = 100;
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < maxDist) {
-        const op = (1 - dist / maxDist) * 0.04;
+(function animate() {
+  ctx.clearRect(0,0,W,H);
+  for (let i=0;i<particles.length;i++) {
+    for (let j=i+1;j<particles.length;j++) {
+      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){
         ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(255,255,255,${op})`;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle=`rgba(255,255,255,${(1-d/100)*0.04})`;
+        ctx.lineWidth=0.5; ctx.stroke();
       }
     }
   }
-}
-
-function animate() {
-  ctx.clearRect(0, 0, W, H);
-  drawConnections();
-  particles.forEach(p => { p.update(); p.draw(); });
+  particles.forEach(p=>{p.update();p.draw();});
   requestAnimationFrame(animate);
-}
-animate();
+})();
 
-/* ─────────────────────────────────────────
-   LINE COUNT
-───────────────────────────────────────── */
-const codeEl   = document.getElementById('code');
-const lineCount = document.getElementById('lineCount');
-
+/* ── LINE COUNT ── */
+const codeEl = document.getElementById('code');
 codeEl.addEventListener('input', () => {
-  const lines = codeEl.value.split('\n').length;
-  lineCount.textContent = `${lines} line${lines === 1 ? '' : 's'}`;
+  const n = codeEl.value.split('\n').length;
+  document.getElementById('lineCount').textContent = `${n} line${n===1?'':'s'}`;
 });
 
-/* ─────────────────────────────────────────
-   TOAST
-───────────────────────────────────────── */
+/* ── TOAST ── */
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-/* ─────────────────────────────────────────
-   SAVE SCRIPT
-───────────────────────────────────────── */
-function saveScript() {
+/* ── COPY HELPERS ── */
+function animateCopyBtn(btn, originalHTML) {
+  btn.classList.add('copied');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> Copied!`;
+  setTimeout(()=>{ btn.innerHTML = originalHTML; btn.classList.remove('copied'); }, 2000);
+}
+
+/* ── SAVE ── */
+async function saveScript() {
   const code = codeEl.value.trim();
   if (!code) { showToast('⚠ Paste a script first'); return; }
 
-  const id = Math.random().toString(36).slice(2, 10).toUpperCase();
-  const fakeUrl = `https://codevault.gg/s/${id}`;
-  const ls = `loadstring(game:HttpGet("${fakeUrl}"))()`;
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
 
-  document.getElementById('loadstringCode').textContent = ls;
-  document.getElementById('shareUrl').textContent = fakeUrl;
-  document.getElementById('scriptId').textContent = `#${id}`;
+  try {
+    const res = await fetch('https://codevault-gvyn.onrender.com/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
 
-  const result = document.getElementById('result');
-  result.style.display = 'block';
+    if (!res.ok) throw new Error();
 
-  showToast('✓ Script saved');
+    const data = await res.json();
+    const id = data.id;
+
+    // Real URLs from the actual backend
+    const rawUrl  = `https://codevault-gvyn.onrender.com/raw/${id}`;
+    const viewUrl = `view.html?id=${id}`;
+    const ls      = `loadstring(game:HttpGet("${rawUrl}"))()`;
+
+    document.getElementById('rawUrlText').textContent    = rawUrl;
+    document.getElementById('loadstringText').textContent = ls;
+    document.getElementById('scriptIdLabel').textContent  = `#${id}`;
+    document.getElementById('viewLink').href = viewUrl;
+
+    document.getElementById('result').style.display = 'block';
+    showToast('✓ Script saved');
+
+  } catch {
+    showToast('⚠ Error saving script');
+  } finally {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg> Save Script`;
+    btn.disabled = false;
+  }
 }
 
-/* ─────────────────────────────────────────
-   COPY LOADSTRING
-───────────────────────────────────────── */
-function copyLoadstring() {
-  const ls = document.getElementById('loadstringCode').textContent;
-  navigator.clipboard.writeText(ls).then(() => {
-    const btn = document.getElementById('copyLsBtn');
-    btn.classList.add('copied');
-    btn.querySelector('span') && (btn.querySelector('span').textContent = 'Copied!');
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> Copied!`;
-    showToast('✓ Loadstring copied');
-    setTimeout(() => {
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Loadstring`;
-      btn.classList.remove('copied');
-    }, 2000);
+/* ── COPY RAW URL ── */
+function copyRawUrl() {
+  const url = document.getElementById('rawUrlText').textContent;
+  const btn = document.getElementById('copyUrlBtn');
+  const orig = btn.innerHTML;
+  navigator.clipboard.writeText(url).then(()=>{
+    animateCopyBtn(btn, orig);
+    showToast('✓ Raw URL copied');
   });
 }
 
-/* ─────────────────────────────────────────
-   COPY CODE
-───────────────────────────────────────── */
+/* ── COPY LOADSTRING ── */
+function copyLoadstring() {
+  const ls  = document.getElementById('loadstringText').textContent;
+  const btn = document.getElementById('copyLsBtn');
+  const orig = btn.innerHTML;
+  navigator.clipboard.writeText(ls).then(()=>{
+    animateCopyBtn(btn, orig);
+    showToast('✓ Loadstring copied');
+  });
+}
+
+/* ── COPY CODE ── */
 function copyCode() {
   const code = codeEl.value;
   if (!code.trim()) { showToast('⚠ Nothing to copy'); return; }
-  navigator.clipboard.writeText(code).then(() => showToast('✓ Code copied'));
+  navigator.clipboard.writeText(code).then(()=>showToast('✓ Code copied'));
 }
 
-/* ─────────────────────────────────────────
-   COPY URL
-───────────────────────────────────────── */
-function copyUrl() {
-  const url = document.getElementById('shareUrl').textContent;
-  navigator.clipboard.writeText(url).then(() => showToast('✓ URL copied'));
-}
-
-/* ─────────────────────────────────────────
-   CLEAR
-───────────────────────────────────────── */
+/* ── CLEAR ── */
 function clearEditor() {
   codeEl.value = '';
-  lineCount.textContent = '0 lines';
+  document.getElementById('lineCount').textContent = '0 lines';
   document.getElementById('result').style.display = 'none';
   showToast('Editor cleared');
 }
 </script>
+
 </body>
 </html>
