@@ -7,14 +7,21 @@
 <link href="https://fonts.googleapis.com/css2%2Ffamily=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <script>
-  // ── REGLA 1: DESVÍO INMEDIATO AL DASHBOARD SI NO VIENE DE ALLÍ ──
+  // ── VALIDACIÓN INTELIGENTE DE ACCESO SEGURO ──
+  const activeUser = localStorage.getItem("logged_user");
   const urlParams = new URLSearchParams(window.location.search);
-  const vieneDesdeDashboard = urlParams.get('from') === 'login';
+  const vieneDeFila = urlParams.get('from') === 'dashboard';
 
-  if (!vieneDesdeDashboard) {
+  // Si no hay una sesión activa en el celular, directo al Login sin escalas
+  if (!activeUser) {
     window.location.href = "login.html";
   }
+  // Si está logueado pero entró escribiendo "index.html" a secas (sin venir a agregar un script de carpeta)
+  else if (!vieneDeFila) {
+    window.location.href = "dashboard.html";
+  }
 </script>
+
 
 <style>
 :root {
