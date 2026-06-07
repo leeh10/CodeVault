@@ -43,18 +43,18 @@ app.get("/raw/:id", (req, res) => {
         res.setHeader('Content-Type', 'text/plain');
         return res.send(code);
     } else {
-        // Navegador Humano: Pasarela personalizada estilo Jnkie
+        // Navegador Humano: Advertencia agresiva contra filtraciones (Cero acceso al código)
         return res.send(`
             <!DOCTYPE html>
             <html lang="es">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>CodeVault — Secure Gateway</title>
-                <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+                <title>CodeVault — Access Denied</title>
+                <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
                 <style>
                     body {
-                        background: #080808;
+                        background: #050505;
                         color: #f0f0f0;
                         font-family: 'Space Grotesk', sans-serif;
                         display: flex;
@@ -65,92 +65,97 @@ app.get("/raw/:id", (req, res) => {
                         overflow: hidden;
                         position: relative;
                     }
+                    /* Rejilla de fondo estética futurista cyberpunk */
                     body::before {
                         content: '';
                         position: absolute;
                         inset: 0;
-                        background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-                        background-size: 24px 24px;
+                        background-image: linear-gradient(rgba(255, 0, 0, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 0, 0.01) 1px, transparent 1px);
+                        background-size: 30px 30px;
+                        z-index: 1;
+                    }
+                    /* Brillo ambiental rojo de advertencia de fondo */
+                    body::after {
+                        content: '';
+                        position: absolute;
+                        width: 300px;
+                        height: 300px;
+                        background: rgba(255, 0, 0, 0.04);
+                        border-radius: 50%;
+                        filter: blur(120px);
                         z-index: 1;
                     }
                     .gateway-card {
-                        background: #0f0f0f;
-                        border: 1px solid #242424;
-                        padding: 40px 30px;
+                        background: #0a0a0a;
+                        border: 1px solid #1f1414;
+                        padding: 50px 40px;
                         border-radius: 16px;
                         text-align: center;
-                        max-width: 420px;
+                        max-width: 440px;
                         width: 90%;
                         z-index: 2;
-                        box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+                        box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+                        position: relative;
+                        animation: flashBorder 4s infinite alternate;
+                    }
+                    @keyframes flashBorder {
+                        0% { border-color: #1f1414; }
+                        100% { border-color: #3d1414; }
                     }
                     .badge {
-                        background: rgba(255,255,255,0.03);
-                        border: 1px solid #242424;
+                        background: rgba(255, 68, 68, 0.04);
+                        border: 1px solid rgba(255, 68, 68, 0.15);
                         padding: 6px 14px;
-                        border-radius: 30px;
+                        border-radius: 6px;
                         font-family: 'JetBrains Mono', monospace;
                         font-size: 11px;
-                        color: #555;
+                        color: #ff4444;
                         display: inline-block;
-                        margin-bottom: 24px;
-                        letter-spacing: 0.05em;
+                        margin-bottom: 28px;
+                        letter-spacing: 0.1em;
+                        font-weight: 700;
                     }
                     h1 {
                         font-family: 'JetBrains Mono', monospace;
-                        font-size: 32px;
+                        font-size: 34px;
                         font-weight: 700;
-                        margin: 0 0 12px 0;
-                        letter-spacing: -1px;
+                        margin: 0 0 16px 0;
+                        letter-spacing: -1.5px;
                     }
-                    h1 span { color: #555; }
+                    h1 span { color: #333; }
                     p {
-                        color: #666;
-                        font-size: 13.5px;
+                        color: #777;
+                        font-size: 14px;
                         line-height: 1.6;
                         margin: 0 0 32px 0;
                     }
-                    .btn-copy {
-                        background: #ffffff;
-                        color: #080808;
-                        border: none;
-                        padding: 14px;
-                        font-weight: 600;
+                    .info-box {
+                        background: #0f0f0f;
+                        border: 1px solid #1a1a1a;
                         border-radius: 10px;
-                        cursor: pointer;
-                        font-size: 13.5px;
-                        transition: all 0.2s cubic-bezier(.16,1,.3,1);
-                        width: 100%;
+                        padding: 16px;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 12px;
+                        color: #aaa;
+                        text-align: left;
+                        line-height: 1.5;
                     }
-                    .btn-copy:hover {
-                        background: #c8c8c8;
-                        transform: translateY(-2px);
+                    .info-box span {
+                        color: #ff4444;
+                        font-weight: 700;
                     }
                 </style>
             </head>
             <body>
                 <div class="gateway-card">
-                    <div class="badge">PROTECTED BY CODEVAULT</div>
+                    <div class="badge">SECURE SYSTEM ALERT</div>
                     <h1>Code<span>Vault</span></h1>
-                    <p>Este script se encuentra protegido legítimamente para evitar su copia o filtración directa sin autorización.</p>
-                    <button class="btn-copy" onclick="copyToClipboard()">Copy Script Code</button>
+                    <p>Has intentado acceder a un script protegido. Por motivos de seguridad y encriptación de credenciales, No lo intentes :)</p>
+                    <div class="info-box">
+                        > <span>ACCESO DENEGADO</span><br>
+                        > Ejecuta el script usando el comando loadstring correspondiente en tu executor móvil o PC.
+                    </div>
                 </div>
-                <script>
-                    function copyToClipboard() {
-                        const scriptCode = \`${code.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`;
-                        navigator.clipboard.writeText(scriptCode).then(() => {
-                            const btn = document.querySelector('.btn-copy');
-                            btn.textContent = 'Copied Successfully!';
-                            btn.style.background = '#1c3d29';
-                            btn.style.color = '#4caf50';
-                            setTimeout(() => {
-                                btn.textContent = 'Copy Script Code';
-                                btn.style.background = '#ffffff';
-                                btn.style.color = '#080808';
-                            }, 2000);
-                        });
-                    }
-                </script>
             </body>
             </html>
         `);
