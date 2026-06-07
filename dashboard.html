@@ -1,462 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard - CodeVault</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<title>CodeVault — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --surface2: #161616;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --text: #f0f0f0;
+  --muted: #555;
+  --accent: #ffffff;
+  --accent2: #c8c8c8;
+}
+
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-    background:#0b0b0b;
-    color:white;
-    font-family:'JetBrains Mono', monospace;
-    min-height:100vh;
-    padding:30px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
 }
-.container { max-width:1100px; margin:auto; }
-.logo { font-size:42px; font-weight:bold; margin-bottom:5px; color:#00ff88; }
-.subtitle { color:#888; margin-bottom:25px; font-size:14px; }
 
-/* --- PANTALLAS DE LOGIN / REGISTER --- */
+#canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+body::before {
+  content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px; opacity: 0.5;
+}
+
+.container { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; padding: 60px 24px; }
+
+/* HEADER */
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 45px; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
+}
+.logo-wrap { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 38px; height: 38px; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.logo { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+.logo span { color: var(--muted); }
+
+/* AUTH BOXES */
 .auth-box {
-    max-width: 400px;
-    margin: 80px auto;
-    background: #121212;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
+  max-width: 400px; margin: 80px auto; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 40px 30px;
+  text-align: center; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
 }
-.auth-box h2 { margin-bottom: 20px; color: #00ff88; }
+.auth-box h2 { font-family: 'JetBrains Mono', monospace; font-size: 22px; margin-bottom: 24px; }
 .auth-box input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: white;
-    font-family: inherit;
+  width: 100%; padding: 12px 16px; margin-bottom: 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px; color: white;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: border-color 0.2s;
 }
-.auth-box input:focus { border-color: #00ff88; outline: none; }
-.auth-link { color: #888; font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
-.auth-link:hover { color: #00ff88; }
+.auth-box input:focus { border-color: #666; outline: none; }
+.auth-link { color: var(--muted); font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
+.auth-link:hover { color: var(--text); }
 
-/* --- PANEL PRINCIPAL (DASHBOARD) --- */
-.dashboard-layout {
-    display: none; /* Se activa con JS */
-    grid-template-columns: 280px 1fr;
-    gap: 30px;
-}
-
-/* Barra Lateral (Carpetas) */
-.sidebar {
-    background: #121212;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 20px;
-}
-.sidebar h3 { font-size: 18px; margin-bottom: 15px; color: #888; }
-.folder-list { list-style: none; margin-bottom: 20px; }
+/* LAYOUT */
+.dashboard-layout { display: none; grid-template-columns: 280px 1fr; gap: 30px; animation: fadeUp 0.8s 0.1s cubic-bezier(.16,1,.3,1) both; }
+.sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.sidebar h3 { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.folder-list { list-style: none; }
 .folder-item {
-    padding: 10px;
-    background: #1a1a1a;
-    border: 1px solid #252525;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
+  padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 9px; margin-bottom: 10px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; font-size: 14px; transition: all 0.2s;
 }
-.folder-item:hover, .folder-item.active {
-    border-color: #00ff88;
-    background: #14221a;
-}
-.delete-btn {
-    background: transparent;
-    color: #ff3344;
-    padding: 2px 6px;
-    font-size: 11px;
-}
+.folder-item:hover, .folder-item.active { border-color: var(--border2); background: #1c1c1c; }
+.delete-btn { background: transparent; color: #555; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 4px; transition: color 0.2s; }
+.delete-btn:hover { color: #e05555; }
 
-/* Área de Contenido (Scripts) */
-.main-content {
-    background: #121212;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 25px;
-}
-.content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.script-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 15px;
-}
+.main-content { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; min-height: 450px; }
+.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+
 .script-card {
-    background: #1a1a1a;
-    border: 1px solid #252525;
-    border-radius: 10px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 140px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 150px; transition: border-color 0.2s;
 }
-.script-card h4 { color: #00ff88; font-size: 15px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.script-card p { color: #666; font-size: 11px; margin-bottom: 15px; }
-.card-actions { display: flex; gap: 5px; }
+.script-card:hover { border-color: var(--border2); }
+.script-card h4 { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.script-card p { font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 11px; }
+.card-actions { display: flex; gap: 8px; margin-top: 15px; }
 
-/* --- VENTANA MODAL (EDITOR DE SCRIPT) --- */
-.modal {
-    display: none;
-    position: fixed;
-    top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.85);
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    z-index: 100;
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: none; border-radius: 9px;
+  padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
-.modal-content {
-    background: #121212;
-    border: 1px solid #222;
-    border-radius: 12px;
-    max-width: 800px;
-    width: 100%;
-    padding: 25px;
-}
-textarea {
-    width: 100%;
-    height: 380px;
-    background: #0b0b0b;
-    color: #00ff88;
-    border: 1px solid #222;
-    border-radius: 8px;
-    padding: 15px;
-    resize: none;
-    font-family: inherit;
-    font-size: 13px;
-    margin: 15px 0;
-}
+.btn-primary { background: var(--text); color: #080808; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: #555; }
+.btn-danger { background: transparent; color: #555; border: 1px solid var(--border); }
+.btn-danger:hover { color: #e05555; border-color: #e0555544; }
+.logout-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.logout-btn:hover { color: #e05555; border-color: #e0555533; }
 
-/* Botones del Sistema */
-button {
-    background: #00ff88;
-    color: black;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: inherit;
-    font-size: 13px;
+/* TOAST */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: #080808; font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 600; padding: 12px 22px; border-radius: 10px;
+  pointer-events: none; opacity: 0; transition: all 0.35s cubic-bezier(.16,1,.3,1); z-index: 100;
 }
-button:hover { opacity: .8; }
-.btn-secondary { background: #222; color: #888; border: 1px solid #333; }
-.btn-danger { background: #ff3344; color: white; }
-.btn-loadstring { background: #ff0055; color: white; }
-.logout-btn { background: #ff3344; color: white; padding: 6px 12px; font-size: 12px; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
+<canvas id="canvas"></canvas>
+
 <div class="container">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <div class="logo">CodeVault</div>
-            <div class="subtitle">Dispositivo Local Safe-System</div>
-        </div>
-        <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-icon">⬡</div>
+      <div class="logo">Code<span>Vault</span></div>
+    </div>
+    <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+  </header>
+
+  <div id="screenLogin" class="auth-box">
+    <h2>Device Login</h2>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button class="btn btn-primary" style="width: 100%; margin-top: 5px;" onclick="login()">Unlock Vault</button>
+    <span class="auth-link" onclick="showScreen('Register')">Register new account</span>
+  </div>
+
+  <div id="screenRegister" class="auth-box" style="display: none;">
+    <h2>Create Profile</h2>
+    <input type="text" id="regUser" placeholder="Choose Username">
+    <input type="password" id="regPass" placeholder="Choose Password">
+    <button class="btn btn-primary" style="width: 100%; margin-top: 5px;" onclick="register()">Sign Up</button>
+    <span class="auth-link" onclick="showScreen('Login')">Back to Login</span>
+  </div>
+
+  <div id="screenDashboard" class="dashboard-layout">
+    <div class="sidebar">
+      <h3>📂 Folders</h3>
+      <ul id="folderList" class="folder-list"></ul>
+      <button class="btn btn-ghost" onclick="createNewFolder()">+ New Folder</button>
     </div>
 
-    <div id="screenRegister" class="auth-box" style="display: none;">
-        <h2>Create Account</h2>
-        <input type="text" id="regUser" placeholder="Choose Username">
-        <input type="password" id="regPass" placeholder="Choose Password">
-        <button style="width: 100%;" onclick="register()">Sign Up</button>
-        <span class="auth-link" onclick="showScreen('Login')">Already have an account? Login</span>
+    <div class="main-content">
+      <div class="content-header">
+        <h3 id="currentFolderName" style="font-family:'JetBrains Mono'; font-size:15px; color:#666;">Select a folder</h3>
+        <button id="newScriptBtn" class="btn btn-primary" style="display: none;" onclick="goToEditorForNewScript()">+ Add Script</button>
+      </div>
+      <div id="scriptGrid" class="script-grid"></div>
     </div>
-
-    <div id="screenLogin" class="auth-box">
-        <h2>Device Identity Login</h2>
-        <input type="text" id="loginUser" placeholder="Username">
-        <input type="password" id="loginPass" placeholder="Password">
-        <button style="width: 100%;" onclick="login()">Unlock Vault</button>
-        <span class="auth-link" onclick="showScreen('Register')">New user on this device? Register</span>
-    </div>
-
-    <div id="screenDashboard" class="dashboard-layout">
-        
-        <div class="sidebar">
-            <h3>📂 Folders</h3>
-            <ul id="folderList" class="folder-list">
-                </ul>
-            <button style="width: 100%;" onclick="createNewFolder()">+ New Folder</button>
-        </div>
-
-        <div class="main-content">
-            <div class="content-header">
-                <h3 id="currentFolderName" style="color:#888;">Select a folder</h3>
-                <button id="newScriptBtn" style="display: none;" onclick="openScriptModal(null)">+ Add Script</button>
-            </div>
-            <div id="scriptGrid" class="script-grid">
-                </div>
-        </div>
-
-    </div>
+  </div>
 </div>
 
-<div id="scriptModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Script Editor</h3>
-        <input type="text" id="scriptTitleInput" placeholder="Script Name (e.g. AutoFarm)" style="width:100%; padding:10px; margin-top:10px; background:#0b0b0b; border:1px solid #222; color:white; border-radius:8px;">
-        <textarea id="scriptTextInput" placeholder="Paste your Lua code here..."></textarea>
-        <div style="display: flex; justify-content: space-between;">
-            <div style="display: flex; gap: 8px;">
-                <button onclick="saveScriptData()">Save Script</button>
-                <button class="btn-secondary" onclick="closeScriptModal()">Cancel</button>
-            </div>
-            <button id="modalLoadstringBtn" class="btn-loadstring" style="display: none;">Copy Loadstring</button>
-        </div>
-    </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// --- CAPA DE DATOS EN LOCALSTORAGE ---
-let currentFolderId = null;
-let activeEditingScriptId = null;
+/* Particle Engine */
+const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); let W, H;
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; } resize(); addEventListener('resize', resize);
+class Particle {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x = Math.random() * W; this.y = init ? Math.random() * H : H + 10;
+    this.vx = (Math.random() - 0.5) * 0.25; this.vy = -(Math.random() * 0.3 + 0.05);
+    this.r = Math.random() * 1.2 + 0.3; this.alpha = Math.random() * 0.35 + 0.05; this.life = 0; this.maxLife = Math.random() * 600 + 300;
+  }
+  update() { this.x += this.vx; this.y += this.vy; this.life++; if (this.life > this.maxLife || this.y < -10) this.reset(false); }
+  draw() { const p = this.life / this.maxLife; const fade = p < 0.1 ? p/0.1 : p > 0.8 ? 1-(p-0.8)/0.2 : 1; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,' + (this.alpha * fade) + ')'; ctx.fill(); }
+}
+const particles = Array.from({length:100}, () => new Particle());
+(function animate() {
+  ctx.clearRect(0,0,W,H);
+  for (let i=0;i<particles.length;i++) {
+    for (let j=i+1;j<particles.length;j++) {
+      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y; const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.strokeStyle='rgba(255,255,255,'+(1-d/100)*0.03+')'; ctx.lineWidth=0.5; ctx.stroke(); }
+    }
+  }
+  particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate);
+})();
 
-// Estructura inicial por defecto si el almacén está vacío
+/* Vault System Sync */
+let currentFolderId = null;
 if(!localStorage.getItem("vault_users")) localStorage.setItem("vault_users", JSON.stringify({}));
 if(!localStorage.getItem("vault_folders")) localStorage.setItem("vault_folders", JSON.stringify([]));
 if(!localStorage.getItem("vault_scripts")) localStorage.setItem("vault_scripts", JSON.stringify([]));
 
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+function getLoggedUser() { return sessionStorage.getItem("logged_user"); }
+
 function showScreen(screen) {
-    document.getElementById("screenLogin").style.display = screen === 'Login' ? 'block' : 'none';
-    document.getElementById("screenRegister").style.display = screen === 'Register' ? 'block' : 'none';
-    document.getElementById("screenDashboard").style.display = screen === 'Dashboard' ? 'grid' : 'none';
-    document.getElementById("logoutBtn").style.display = screen === 'Dashboard' ? 'block' : 'none';
+  document.getElementById("screenLogin").style.display = screen === 'Login' ? 'block' : 'none';
+  document.getElementById("screenRegister").style.display = screen === 'Register' ? 'block' : 'none';
+  document.getElementById("screenDashboard").style.display = screen === 'Dashboard' ? 'grid' : 'none';
+  document.getElementById("logoutBtn").style.display = screen === 'Dashboard' ? 'block' : 'none';
 }
 
-// --- SISTEMA DE AUTENTICACIÓN ---
 function register() {
-    const user = document.getElementById("regUser").value.trim();
-    const pass = document.getElementById("regPass").value.trim();
-    if(!user || !pass) return alert("Fill all fields");
-
-    let users = JSON.parse(localStorage.getItem("vault_users"));
-    if(users[user]) return alert("Username already registered on this device!");
-
-    users[user] = pass;
-    localStorage.setItem("vault_users", JSON.stringify(users));
-    alert("Account created! Please login.");
-    showScreen('Login');
+  const user = document.getElementById("regUser").value.trim(); const pass = document.getElementById("regPass").value.trim();
+  if(!user || !pass) return showToast("⚠️ Fill all fields");
+  let users = JSON.parse(localStorage.getItem("vault_users"));
+  if(users[user]) return showToast("⚠️ Username taken");
+  users[user] = pass; localStorage.setItem("vault_users", JSON.stringify(users));
+  showToast("✓ Registered successfully!"); showScreen('Login');
 }
 
 function login() {
-    const user = document.getElementById("loginUser").value.trim();
-    const pass = document.getElementById("loginPass").value.trim();
-    
-    let users = JSON.parse(localStorage.getItem("vault_users"));
-    if(users[user] && users[user] === pass) {
-        sessionStorage.setItem("logged_user", user); // Guarda sesión activa temporal
-        showScreen('Dashboard');
-        renderFolders();
-    } else {
-        alert("Invalid login for this device.");
-    }
+  const user = document.getElementById("loginUser").value.trim(); const pass = document.getElementById("loginPass").value.trim();
+  let users = JSON.parse(localStorage.getItem("vault_users"));
+  if(users[user] && users[user] === pass) {
+    sessionStorage.setItem("logged_user", user); showScreen('Dashboard'); renderFolders();
+  } else { showToast("⚠️ Invalid login credentials"); }
 }
 
 function logout() {
-    sessionStorage.removeItem("logged_user");
-    currentFolderId = null;
-    document.getElementById("scriptGrid").innerHTML = "";
-    document.getElementById("currentFolderName").innerText = "Select a folder";
-    document.getElementById("newScriptBtn").style.display = "none";
-    showScreen('Login');
+  sessionStorage.removeItem("logged_user"); currentFolderId = null;
+  document.getElementById("scriptGrid").innerHTML = ""; document.getElementById("currentFolderName").innerText = "Select a folder";
+  document.getElementById("newScriptBtn").style.display = "none"; showScreen('Login');
 }
 
-// --- LOGICA DE GESTIÓN DE CARPETAS ---
-function getLoggedUser() { return sessionStorage.getItem("logged_user"); }
-
 function renderFolders() {
-    const user = getLoggedUser();
-    const folders = JSON.parse(localStorage.getItem("vault_folders"));
-    const listElement = document.getElementById("folderList");
-    listElement.innerHTML = "";
-
-    const userFolders = folders.filter(f => f.username === user);
-
-    userFolders.forEach(folder => {
-        const li = document.createElement("li");
-        li.className = `folder-item ${currentFolderId === folder.id ? 'active' : ''}`;
-        li.innerHTML = `
-            <span onclick="selectFolder('${folder.id}', '${folder.name}')">📁 ${folder.name}</span>
-            <button class="delete-btn" onclick="deleteFolder('${folder.id}', event)">X</button>
-        `;
-        listElement.appendChild(li);
-    });
+  const user = getLoggedUser(); const folders = JSON.parse(localStorage.getItem("vault_folders"));
+  const listElement = document.getElementById("folderList"); listElement.innerHTML = "";
+  const userFolders = folders.filter(f => f.username === user);
+  userFolders.forEach(folder => {
+    const li = document.createElement("li");
+    li.className = `folder-item ${currentFolderId === folder.id ? 'active' : ''}`;
+    li.innerHTML = `<span onclick="selectFolder('${folder.id}', '${folder.name}')">📁 ${folder.name}</span><button class="delete-btn" onclick="deleteFolder('${folder.id}', event)">✕</button>`;
+    listElement.appendChild(li);
+  });
 }
 
 function createNewFolder() {
-    const name = prompt("Enter folder name:");
-    if(!name || !name.trim()) return;
-
-    const folders = JSON.parse(localStorage.getItem("vault_folders"));
-    const newFolder = {
-        id: "fold_" + Date.now(),
-        name: name.trim(),
-        username: getLoggedUser()
-    };
-
-    folders.push(newFolder);
-    localStorage.setItem("vault_folders", JSON.stringify(folders));
-    renderFolders();
+  const name = prompt("Enter folder name:"); if(!name || !name.trim()) return;
+  const folders = JSON.parse(localStorage.getItem("vault_folders"));
+  folders.push({ id: "fold_" + Date.now(), name: name.trim(), username: getLoggedUser() });
+  localStorage.setItem("vault_folders", JSON.stringify(folders)); renderFolders();
 }
 
 function deleteFolder(id, event) {
-    event.stopPropagation(); // Evita seleccionar la carpeta al borrar
-    if(!confirm("Are you sure you want to delete this folder and ALL scripts inside?")) return;
-
-    let folders = JSON.parse(localStorage.getItem("vault_folders"));
-    folders = folders.filter(f => f.id !== id);
-    localStorage.setItem("vault_folders", JSON.stringify(folders));
-
-    let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-    scripts = scripts.filter(s => s.folderId !== id);
-    localStorage.setItem("vault_scripts", JSON.stringify(scripts));
-
-    if(currentFolderId === id) {
-        currentFolderId = null;
-        document.getElementById("currentFolderName").innerText = "Select a folder";
-        document.getElementById("newScriptBtn").style.display = "none";
-    }
-    renderFolders();
-    renderScripts();
+  event.stopPropagation(); if(!confirm("Delete folder and all its contents permanently?")) return;
+  let folders = JSON.parse(localStorage.getItem("vault_folders"));
+  localStorage.setItem("vault_folders", JSON.stringify(folders.filter(f => f.id !== id)));
+  let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
+  localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.folderId !== id)));
+  if(currentFolderId === id) { currentFolderId = null; document.getElementById("currentFolderName").innerText = "Select a folder"; document.getElementById("newScriptBtn").style.display = "none"; }
+  renderFolders(); renderScripts();
 }
 
 function selectFolder(id, name) {
-    currentFolderId = id;
-    document.getElementById("currentFolderName").innerText = `📁 ${name}`;
-    document.getElementById("newScriptBtn").style.display = "block";
-    renderFolders();
-    renderScripts();
+  currentFolderId = id; document.getElementById("currentFolderName").innerText = `📁 ${name}`;
+  document.getElementById("newScriptBtn").style.display = "inline-flex"; renderFolders(); renderScripts();
 }
 
-// --- LOGICA DE GESTIÓN DE SCRIPTS ---
 function renderScripts() {
-    const grid = document.getElementById("scriptGrid");
-    grid.innerHTML = "";
-    if(!currentFolderId) return;
-
-    const scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-    const folderScripts = scripts.filter(s => s.folderId === currentFolderId);
-
-    folderScripts.forEach(script => {
-        const card = document.createElement("div");
-        card.className = "script-card";
-        card.innerHTML = `
-            <div>
-                <h4>${script.title}</h4>
-                <p>Local ID: ${script.id}</p>
-            </div>
-            <div class="card-actions">
-                <button onclick="openScriptModal('${script.id}')" style="padding:5px 10px; font-size:11px;">Edit</button>
-                <button class="btn-danger" onclick="deleteScript('${script.id}')" style="padding:5px 10px; font-size:11px;">Delete</button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
+  const grid = document.getElementById("scriptGrid"); grid.innerHTML = ""; if(!currentFolderId) return;
+  const scripts = JSON.parse(localStorage.getItem("vault_scripts"));
+  const folderScripts = scripts.filter(s => s.folderId === currentFolderId);
+  folderScripts.forEach(script => {
+    const card = document.createElement("div"); card.className = "script-card";
+    card.innerHTML = `<div><h4>${script.title}</h4><p>ID: ${script.id}</p></div>
+      <div class="card-actions">
+        <button class="btn btn-ghost" style="padding:6px 12px; font-size:11px;" onclick="viewScript('${script.id}')">View/Edit</button>
+        <button class="btn btn-danger" style="padding:6px 12px; font-size:11px;" onclick="deleteScript('${script.id}')">Delete</button>
+      </div>`;
+    grid.appendChild(card);
+  });
 }
 
-function openScriptModal(scriptId) {
-    activeEditingScriptId = scriptId;
-    const modal = document.getElementById("scriptModal");
-    const loadstringBtn = document.getElementById("modalLoadstringBtn");
-    modal.style.display = "flex";
-
-    if(scriptId) {
-        // Modo Edición de script existente
-        const scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-        const script = scripts.find(s => s.id === scriptId);
-        document.getElementById("modalTitle").innerText = "Edit Script";
-        document.getElementById("scriptTitleInput").value = script.title;
-        document.getElementById("scriptTextInput").value = script.code;
-        
-        // El loadstring emulado localmente usando la API de datos locales
-        loadstringBtn.style.display = "block";
-        loadstringBtn.onclick = function() {
-            // Genera un comando simulado limpio
-            const simulatedCommand = `print("Executing ${script.title}...") -- Local ID: ${script.id}\nlocal code = [[${script.code}]]; loadstring(code)()`;
-            navigator.clipboard.writeText(simulatedCommand);
-            alert("Loadstring local emulado guardado en portapapeles!");
-        };
-    } else {
-        // Modo Crear script nuevo
-        document.getElementById("modalTitle").innerText = "New Script";
-        document.getElementById("scriptTitleInput").value = "";
-        document.getElementById("scriptTextInput").value = "";
-        loadstringBtn.style.display = "none";
-    }
+function goToEditorForNewScript() {
+  window.location.href = `index.html?folderId=${currentFolderId}`;
 }
 
-function closeScriptModal() {
-    document.getElementById("scriptModal").style.display = "none";
-}
-
-function saveScriptData() {
-    const title = document.getElementById("scriptTitleInput").value.trim();
-    const code = document.getElementById("scriptTextInput").value;
-    if(!title) return alert("Please enter a script name");
-
-    let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-
-    if(activeEditingScriptId) {
-        // Actualizar existente
-        scripts = scripts.map(s => {
-            if(s.id === activeEditingScriptId) {
-                return { ...s, title: title, code: code };
-            }
-            return s;
-        });
-    } else {
-        // Añadir nuevo script a la carpeta activa
-        const newScript = {
-            id: "sc_" + Math.random().toString(36).substr(2, 9),
-            folderId: currentFolderId,
-            title: title,
-            code: code
-        };
-        scripts.push(newScript);
-    }
-
-    localStorage.setItem("vault_scripts", JSON.stringify(scripts));
-    closeScriptModal();
-    renderScripts();
+function viewScript(id) {
+  window.location.href = `view.html?id=${id}`;
 }
 
 function deleteScript(id) {
-    if(!confirm("Delete this script?")) return;
-    let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-    scripts = scripts.filter(s => s.id !== id);
-    localStorage.setItem("vault_scripts", JSON.stringify(scripts));
-    renderScripts();
+  if(!confirm("Delete this script?")) return;
+  let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
+  localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.id !== id)));
+  renderScripts(); showToast("✓ Script deleted locally");
 }
 
-// Mantener sesión si recarga la página por accidente
-if(sessionStorage.getItem("logged_user")) {
-    showScreen('Dashboard');
-    renderFolders();
-}
+if(sessionStorage.getItem("logged_user")) { showScreen('Dashboard'); renderFolders(); }
 </script>
 </body>
 </html>
