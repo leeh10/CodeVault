@@ -5,21 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CodeVault — Edit Profile Settings</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 <style>
 :root {
   --bg: #040404; --surface: #0a0a0a; --surface2: #121212;
   --border: #1c1c1c; --border2: #282828; --text: #f5f5f5; --muted: #666666;
-  --accent: #ffffff;
+  --accent: #ffffff; --danger: #ef4444; --danger-bg: rgba(239, 68, 68, 0.1);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
+
 .profile-card {
-  max-width: 500px; margin: 60px auto; background: var(--surface); border: 1px solid var(--border);
+  max-width: 500px; margin: 40px auto; background: var(--surface); border: 1px solid var(--border);
   border-radius: 14px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 h2 { font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 600; margin-bottom: 24px; }
+h3 { font-family: 'JetBrains Mono'; font-size: 14px; font-weight: 600; margin-top: 10px; margin-bottom: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 
-/* CONTENEDOR DE AVATAR REDISEÑADO PARA DETECTAR CLICS */
+.section-separator { border: 0; height: 1px; background: var(--border); margin: 32px 0; }
+
+/* CONTENEDOR DE AVATAR DETECTAR CLICS */
 .avatar-preview-box { display: flex; align-items: center; gap: 20px; margin-bottom: 28px; }
 .avatar-wrapper { position: relative; width: 76px; height: 76px; cursor: pointer; }
 .p-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #222; border: 2px solid var(--border2); transition: filter 0.2s; }
@@ -30,21 +35,49 @@ h2 { font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 600; margin-bo
 }
 .avatar-wrapper:hover::after { opacity: 1; }
 
-/* OCULTAMOS EL INPUT FILE ORIGINAL */
 #fileInput { display: none; }
 
 label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-input[type="text"] {
+input[type="text"], input[type="password"] {
   width: 100%; padding: 12px 14px; margin-bottom: 20px; background: var(--surface2);
   border: 1px solid var(--border); border-radius: 6px; color: white; font-family: 'Space Grotesk'; font-size: 14px;
 }
-input[type="text"]:focus { border-color: var(--border2); outline: none; }
+input[type="text"]:focus, input[type="password"]:focus { border-color: var(--border2); outline: none; }
+
 .actions { display: flex; justify-content: flex-end; gap: 12px; }
-.btn { padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Space Grotesk'; }
+.btn { padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Space Grotesk'; display: inline-flex; align-items: center; gap: 8px; }
 .btn-save { background: var(--text); color: #040404; }
-.btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--border); text-decoration: none; display: inline-flex; align-items: center; }
-.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: #040404; padding: 12px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 100; }
+.btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--border); text-decoration: none; }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+.btn-danger:hover { background: var(--danger); color: #000; }
+
+/* MODAL / MENÚ DE AJUSTE DE FOTO (CROPPER) */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(4,4,4,0.85); backdrop-filter: blur(8px);
+  z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 440px;
+  border-radius: 12px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+.crop-area { width: 100%; max-height: 280px; background: #000; overflow: hidden; border-radius: 8px; margin-bottom: 20px; }
+.crop-area img { max-width: 100%; display: block; }
+
+/* LOADER DE ELIMINACIÓN */
+.loader-overlay {
+  position: fixed; inset: 0; background: rgba(4,4,4,0.96); backdrop-filter: blur(12px);
+  z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+}
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--danger);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+.loader-text { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--danger); letter-spacing: 0.05em; }
+
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: #040404; padding: 12px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 3000; pointer-events: none; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -53,16 +86,14 @@ input[type="text"]:focus { border-color: var(--border2); outline: none; }
   <h2>Edit Profile Settings</h2>
   
   <div class="avatar-preview-box">
-    <!-- Al hacer clic aquí se abrirá tu galería -->
     <div class="avatar-wrapper" onclick="triggerFileInput()">
       <img id="avatarPreview" class="p-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-3.33-8-3.33z'/%3E%3C/svg%3E">
     </div>
-    <!-- Input oculto para cargar el archivo -->
     <input type="file" id="fileInput" accept="image/*" onchange="processSelectedFile(this)">
     
     <div>
       <p style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">Profile Identity Image</p>
-      <p style="font-size: 11px; color: var(--muted);">Click the circle to upload a picture from your device gallery.</p>
+      <p style="font-size: 11px; color: var(--muted);">Click the circle to upload and move/adjust your picture.</p>
     </div>
   </div>
 
@@ -73,30 +104,77 @@ input[type="text"]:focus { border-color: var(--border2); outline: none; }
     <a href="dashboard.html" class="btn btn-cancel">Cancel</a>
     <button class="btn btn-save" onclick="saveProfileChanges()">Save Changes</button>
   </div>
+
+  <hr class="section-separator">
+
+  <h3>🔒 Security Settings</h3>
+  <label>New Password</label>
+  <input type="password" id="newPassword" placeholder="Enter new password">
+  
+  <label>Confirm New Password</label>
+  <input type="password" id="confirmPassword" placeholder="Repeat new password">
+  
+  <div class="actions">
+    <button class="btn btn-save" style="font-size: 12px; padding: 8px 14px;" onclick="updatePassword()">Update Password</button>
+  </div>
+
+  <hr class="section-separator">
+
+  <h3>⚠️ Danger Zone</h3>
+  <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Once you delete your account, there is no going back. Please be certain.</p>
+  <div class="actions" style="justify-content: flex-start;">
+    <button class="btn btn-danger" onclick="openDeleteModal()">Delete Account Permanently</button>
+  </div>
+</div>
+
+<div id="cropModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3 style="margin-top:0;">📐 Adjust Profile Picture</h3>
+    <div class="crop-area">
+      <img id="cropImage" src="">
+    </div>
+    <div class="actions">
+      <button class="btn btn-cancel" onclick="closeCropModal()">Cancel</button>
+      <button class="btn btn-save" onclick="applyCroppedImage()">Apply Crop</button>
+    </div>
+  </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal-box" style="border-color: rgba(239, 68, 68, 0.4);">
+    <h3 style="margin-top:0; color: var(--danger);">Are you absolutely sure?</h3>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5;"> This will completely wipe your linked profile data, folders, and saved scripts from this browser session. This action cannot be undone.</p>
+    <div class="actions">
+      <button class="btn btn-cancel" onclick="closeDeleteModal()">No, Keep Account</button>
+      <button class="btn btn-danger" style="background: var(--danger); color: #000;" onclick="executeAccountDestruction()">Yes, Delete Identity</button>
+    </div>
+  </div>
+</div>
+
+<div id="destructionLoader" class="loader-overlay">
+  <div class="spinner"></div>
+  <div id="loaderText" class="loader-text">> PURGING VAULT INSTANCE DIRECTORIES...</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
 const activeUser = localStorage.getItem("logged_user");
 if(!activeUser) { window.location.href = "login.html"; }
 
-// Variable global para almacenar temporalmente la foto en Base64
 let base64ImageString = "";
+let cropperInstance = null;
 
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
 
-// Simula el clic en el input de tipo archivo oculto
-function triggerFileInput() {
-  document.getElementById("fileInput").click();
-}
+function triggerFileInput() { document.getElementById("fileInput").click(); }
 
-// Procesa la foto de la galería y la convierte en texto Base64 duradero
+// Abre el menú/modal para ajustar la foto cargada
 function processSelectedFile(input) {
   const file = input.files[0];
   if (!file) return;
 
-  // Validación rápida de tamaño
   if (file.size > 1500000) {
     showToast("⚠️ Image too large. Please select one under 1.5MB.");
     input.value = "";
@@ -105,16 +183,43 @@ function processSelectedFile(input) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    base64ImageString = e.target.result;
-    document.getElementById("avatarPreview").src = base64ImageString;
+    document.getElementById("cropImage").src = e.target.result;
+    document.getElementById("cropModal").style.display = "flex";
+    
+    // Iniciar Cropper con máscara redonda y movimiento libre
+    if (cropperInstance) cropperInstance.destroy();
+    setTimeout(() => {
+      cropperInstance = new Cropper(document.getElementById("cropImage"), {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'move',
+        background: false,
+        autoCropArea: 1,
+        responsive: true
+      });
+    }, 50);
   };
   reader.readAsDataURL(file);
+}
+
+function closeCropModal() {
+  document.getElementById("cropModal").style.display = "none";
+  document.getElementById("fileInput").value = "";
+  if (cropperInstance) cropperInstance.destroy();
+}
+
+function applyCroppedImage() {
+  if (!cropperInstance) return;
+  // Convierte el fragmento recortado y movido en una imagen comprimida Base64
+  const canvas = cropperInstance.getCroppedCanvas({ width: 150, height: 150 });
+  base64ImageString = canvas.toDataURL("image/jpeg", 0.85);
+  document.getElementById("avatarPreview").src = base64ImageString;
+  closeCropModal();
 }
 
 // ── COMPROBACIÓN INTELIGENTE: CUENTAS NUEVAS Y VIEJAS ──
 const users = JSON.parse(localStorage.getItem("vault_users")) || {};
 
-// Si la cuenta existe y tiene sub-propiedades configuradas
 if (users[activeUser]) {
   document.getElementById("profileName").value = users[activeUser].displayName || activeUser;
   if (users[activeUser].avatarUrl) {
@@ -122,30 +227,89 @@ if (users[activeUser]) {
     base64ImageString = users[activeUser].avatarUrl;
   }
 } else {
-  // Si la cuenta es vieja y no tiene nodo, ponemos el nombre limpio por defecto
   document.getElementById("profileName").value = activeUser;
 }
 
 function saveProfileChanges() {
   const targetName = document.getElementById("profileName").value.trim();
-  
   if(!targetName) return showToast("⚠️ Display Name cannot be empty");
 
   let usersObj = JSON.parse(localStorage.getItem("vault_users")) || {};
+  if (!usersObj[activeUser]) { usersObj[activeUser] = {}; }
   
-  // SOLUCIÓN AL QUEBRANTAMIENTO: Si el nodo del usuario no existe (cuenta vieja o nueva), lo creamos vacío
-  if (!usersObj[activeUser]) {
-    usersObj[activeUser] = {};
-  }
-  
-  // Guardamos los datos de forma segura
   usersObj[activeUser].displayName = targetName;
   usersObj[activeUser].avatarUrl = base64ImageString; 
   
   localStorage.setItem("vault_users", JSON.stringify(usersObj));
-  
   showToast("✓ Profile changes updated successfully!");
   setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+}
+
+// ── SISTEMA DE CAMBIO DE CONTRASEÑA ──
+function updatePassword() {
+  const newPass = document.getElementById("newPassword").value;
+  const confPass = document.getElementById("confirmPassword").value;
+
+  if (!newPass || !confPass) return showToast("⚠️ Fields cannot be empty");
+  if (newPass !== confPass) return showToast("⚠️ Passwords do not match");
+
+  let usersObj = JSON.parse(localStorage.getItem("vault_users")) || {};
+  if (!usersObj[activeUser]) { usersObj[activeUser] = {}; }
+
+  // Guardamos la contraseña estructurada
+  usersObj[activeUser].password = newPass;
+  localStorage.setItem("vault_users", JSON.stringify(usersObj));
+
+  showToast("✓ Password updated successfully!");
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmPassword").value = "";
+}
+
+// ── SISTEMA DE ELIMINACIÓN PERMANENTE ──
+function openDeleteModal() { document.getElementById("deleteModal").style.display = "flex"; }
+define
+function closeDeleteModal() { document.getElementById("deleteModal").style.display = "none"; }
+
+function executeAccountDestruction() {
+  closeDeleteModal();
+  const loaderOverlay = document.getElementById("destructionLoader");
+  const loaderText = document.getElementById("loaderText");
+  loaderOverlay.style.display = "flex";
+
+  let countdown = 5;
+  const phrases = [
+    "> PURGING VAULT INSTANCE DIRECTORIES...",
+    "> DELETING COOLDOWNS AND LINKED DATA...",
+    "> CLEANING LOCAL ENCRYPTION KEY LABELS...",
+    "> REMOVING FOLDERS AND CORRESPONDING SCRIPTS...",
+    "> SHUTTING DOWN VAULT INSTANCE PERMANENTLY..."
+  ];
+
+  // Bucle de cuenta regresiva de 5 segundos cambiando texto simulado
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      loaderText.textContent = phrases[5 - countdown] || phrases[0];
+    } else {
+      clearInterval(interval);
+      
+      // Eliminación física total en LocalStorage
+      let usersObj = JSON.parse(localStorage.getItem("vault_users")) || {};
+      delete usersObj[activeUser];
+      localStorage.setItem("vault_users", JSON.stringify(usersObj));
+
+      // Limpieza colateral de scripts y carpetas del usuario
+      let folders = JSON.parse(localStorage.getItem("vault_folders")) || [];
+      localStorage.setItem("vault_folders", JSON.stringify(folders.filter(f => f.username !== activeUser)));
+
+      let scripts = JSON.parse(localStorage.getItem("vault_scripts")) || [];
+      localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.username !== activeUser)));
+
+      // Desloguear y mandar al Login / Dashboard limpio
+      localStorage.removeItem("logged_user");
+      window.location.href = "login.html";
+    }
+  }, 1000);
 }
 </script>
 </body>
