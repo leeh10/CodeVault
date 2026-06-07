@@ -140,7 +140,8 @@ header {
     </div>
     
     <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="index.html" class="btn btn-ghost" id="btnEditorGlobal" style="padding: 8px 14px; font-size: 12px;">
+      <!-- CORREGIDO: Se le puso display:none por defecto para que no salga en Login/Register -->
+      <a href="index.html" class="btn btn-ghost" id="btnEditorGlobal" style="display: none; padding: 8px 14px; font-size: 12px;">
         ⚙️ Open Editor
       </a>
       <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
@@ -185,7 +186,7 @@ header {
 <div class="toast" id="toast"></div>
 
 <script>
-/* Particle Engine (BUG CORREGIDO PERFECTAMENTE) */
+/* Particle Engine */
 const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); let W, H;
 function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; } resize(); window.addEventListener('resize', resize);
 class Particle {
@@ -219,11 +220,13 @@ if(!localStorage.getItem("vault_scripts")) localStorage.setItem("vault_scripts",
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
 function getLoggedUser() { return sessionStorage.getItem("logged_user"); }
 
+// CORREGIDO: El botón global del editor ahora SÓLO se muestra en el Dashboard
 function showScreen(screen) {
   document.getElementById("screenLogin").style.display = screen === 'Login' ? 'block' : 'none';
   document.getElementById("screenRegister").style.display = screen === 'Register' ? 'block' : 'none';
   document.getElementById("screenDashboard").style.display = screen === 'Dashboard' ? 'grid' : 'none';
   document.getElementById("logoutBtn").style.display = screen === 'Dashboard' ? 'block' : 'none';
+  document.getElementById("btnEditorGlobal").style.display = screen === 'Dashboard' ? 'inline-flex' : 'none';
 }
 
 function register() {
@@ -313,12 +316,15 @@ function renderScripts() {
   });
 }
 
+// CORREGIDO: Ahora sí redirige de forma forzada pasando la carpeta de forma limpia al editor
 function goToEditorForNewScript() {
-  window.location.href = `index.html?folderId=${currentFolderId}`;
+  if(!currentFolderId) return showToast("⚠️ Selecciona una carpeta primero");
+  window.location.href = "index.html?folderId=" + currentFolderId;
 }
 
+// CORREGIDO: Manda el id exacto del script que se quiere actualizar en el editor
 function editScriptInEditor(scriptId) {
-  window.location.href = `index.html?editId=${scriptId}`;
+  window.location.href = "index.html?editId=" + scriptId;
 }
 
 function deleteScript(id) {
@@ -328,7 +334,13 @@ function deleteScript(id) {
   renderScripts(); showToast("✓ Script eliminado");
 }
 
-if(sessionStorage.getItem("logged_user")) { showScreen('Dashboard'); renderFolders(); }
+// Inicialización limpia de sesión
+if(sessionStorage.getItem("logged_user")) { 
+  showScreen('Dashboard'); 
+  renderFolders(); 
+} else {
+  showScreen('Login');
+}
 </script>
 </body>
 </html>
