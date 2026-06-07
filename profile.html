@@ -96,7 +96,7 @@ function processSelectedFile(input) {
   const file = input.files[0];
   if (!file) return;
 
-  // Validación rápida de tamaño (Recomendable mantener imágenes < 1.5MB por límites del LocalStorage)
+  // Validación rápida de tamaño
   if (file.size > 1500000) {
     showToast("⚠️ Image too large. Please select one under 1.5MB.");
     input.value = "";
@@ -105,20 +105,25 @@ function processSelectedFile(input) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    base64ImageString = e.target.result; // Aquí queda guardada la cadena Base64
-    document.getElementById("avatarPreview").src = base64ImageString; // Cambia el aspecto visual al instante
+    base64ImageString = e.target.result;
+    document.getElementById("avatarPreview").src = base64ImageString;
   };
   reader.readAsDataURL(file);
 }
 
-// Carga de Datos Actuales desde el LocalStorage al inicializar
+// ── COMPROBACIÓN INTELIGENTE: CUENTAS NUEVAS Y VIEJAS ──
 const users = JSON.parse(localStorage.getItem("vault_users")) || {};
-if(users[activeUser]) {
+
+// Si la cuenta existe y tiene sub-propiedades configuradas
+if (users[activeUser]) {
   document.getElementById("profileName").value = users[activeUser].displayName || activeUser;
-  if(users[activeUser].avatarUrl) {
+  if (users[activeUser].avatarUrl) {
     document.getElementById("avatarPreview").src = users[activeUser].avatarUrl;
-    base64ImageString = users[activeUser].avatarUrl; // Mantiene la foto actual por defecto
+    base64ImageString = users[activeUser].avatarUrl;
   }
+} else {
+  // Si la cuenta es vieja y no tiene nodo, ponemos el nombre limpio por defecto
+  document.getElementById("profileName").value = activeUser;
 }
 
 function saveProfileChanges() {
@@ -128,12 +133,12 @@ function saveProfileChanges() {
 
   let usersObj = JSON.parse(localStorage.getItem("vault_users")) || {};
   
-  // Si por alguna razón el usuario actual no tiene su nodo base creado, lo estructuramos
-  if(!usersObj[activeUser]) {
+  // SOLUCIÓN AL QUEBRANTAMIENTO: Si el nodo del usuario no existe (cuenta vieja o nueva), lo creamos vacío
+  if (!usersObj[activeUser]) {
     usersObj[activeUser] = {};
   }
   
-  // Guardamos tanto el nuevo alias como la foto local cifrada en el LocalStorage
+  // Guardamos los datos de forma segura
   usersObj[activeUser].displayName = targetName;
   usersObj[activeUser].avatarUrl = base64ImageString; 
   
