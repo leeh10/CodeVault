@@ -603,53 +603,54 @@ async function saveScript() {
     if (!res.ok) throw new Error('save failed');
 
     const data = await res.json();
-    const id   = data.id;
+    const id   = data.id; // La ID única que genera tu backend en Render
 
-    // Guardado automático del ID en el LocalStorage local
+    // Guardado automático del ID en el LocalStorage de usuario
     localStorage.setItem('idUsuario', id);
 
-    // LLAMADA AL SISTEMA FÍSICO: Guarda el archivo .lua en la carpeta local de tu almacenamiento
+    // LLAMADA AL SISTEMA FÍSICO: Guarda el archivo .lua localmente
     await guardarArchivoLocal(id, code);
 
     // =========================================================================
-    // INTEGRACIÓN AUTOMÁTICA CON EL DASHBOARD
+    // VÍNCULO INTERNO CON LAS FILAS DEL DASHBOARD
     // =========================================================================
+    // Obtenemos la carpeta desde donde el usuario hizo clic en "+ Add Script"
     const targetFolder = localStorage.getItem("active_folder_target");
     
     if (targetFolder) {
-      // Le preguntamos al usuario qué nombre quiere ponerle a la tarjeta del dashboard
+      // Le pedimos un título al usuario para la tarjeta de la fila
       let scriptTitle = prompt("Enter a title for this script in your dashboard:", "Untitled Script");
       if (!scriptTitle || !scriptTitle.trim()) {
         scriptTitle = "Script #" + id.substring(0, 5).toUpperCase();
       }
 
-      // Traemos los scripts que ya existan en el dashboard
+      // Leemos la base de datos de scripts del Dashboard
       let currentLocalScripts = JSON.parse(localStorage.getItem("vault_scripts")) || [];
       
-      // Metemos el nuevo objeto vinculándolo a la carpeta activa
+      // Insertamos el nuevo script en el arreglo asociándolo a la fila de la carpeta activa
       currentLocalScripts.push({
         id: id,
         title: scriptTitle.trim(),
-        folderId: targetFolder
+        folderId: targetFolder // <--- Crucial: esto hace que aparezca en la fila correcta
       });
       
-      // Guardamos la base de datos local actualizada
+      // Guardamos en el LocalStorage común
       localStorage.setItem("vault_scripts", JSON.stringify(currentLocalScripts));
       
-      // Limpiamos el trigger de la carpeta para futuras cargas limpias
+      // Limpiamos el trigger temporal de guardado
       localStorage.removeItem("active_folder_target");
       
       showToast('✓ Synced to dashboard folder!');
       
-      // Te redirecciona automáticamente al dashboard directo tras 1.2 segundos para ver el cambio
+      // Redirección automática inmediata al dashboard para ver el script cargado en su fila
       setTimeout(() => {
         window.location.href = "dashboard.html";
-      }, 1200);
-      return; // Detiene la ejecución aquí ya que nos vamos al dashboard
+      }, 1000);
+      return; 
     }
     // =========================================================================
 
-    // Ajuste de Enlaces Limpios apuntando directo a Render para executors (Modo Suelto)
+    // Generación de Enlaces Limpios (Modo suelto si entran a index.html sin carpeta)
     const viewUrl = 'https://leeh10.github.io/CodeVault/view.html?id=' + id;
     const rawUrl  = 'https://codevault-vlv1.onrender.com/raw/' + id;
     const ls      = 'loadstring(game:HttpGet("' + rawUrl + '"))()';
@@ -671,7 +672,6 @@ async function saveScript() {
     btn.disabled = false;
   }
 }
-
 
 function copyRawUrl() {
   const url  = document.getElementById('rawUrlText').textContent;
