@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeVault — Authentication Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #040404; --surface: #0a0a0a; --surface2: #121212;
+  --border: #1c1c1c; --border2: #282828; --text: #f5f5f5;
+  --muted: #666666; --accent: #ffffff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4; z-index: 1;
+}
+.auth-box {
+  width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 40px 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); z-index: 2;
+  animation: fadeUp 0.6s cubic-bezier(.16,1,.3,1) both;
+}
+h2 { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.5px; }
+input {
+  width: 100%; padding: 14px 16px; margin-bottom: 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px; color: white;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: all 0.2s;
+}
+input:focus { border-color: var(--border2); background: #161616; outline: none; }
+.btn {
+  width: 100%; padding: 14px; background: var(--text); color: #040404; border: none;
+  border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn:hover { background: #a3a3a3; transform: translateY(-1px); }
+.auth-link { color: var(--muted); font-size: 13px; cursor: pointer; text-decoration: none; margin-top: 18px; display: inline-block; }
+.auth-link:hover { color: var(--text); text-decoration: underline; }
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: #040404; padding: 12px 22px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 100;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div id="boxLogin" class="auth-box">
+  <h2>Device Login</h2>
+  <input type="text" id="loginUser" placeholder="Username">
+  <input type="password" id="loginPass" placeholder="Password">
+  <button class="btn" onclick="login()">Unlock Vault</button>
+  <span class="auth-link" onclick="toggleAuth('Reg')">Create a new account profile</span>
+</div>
+
+<div id="boxRegister" class="auth-box" style="display: none;">
+  <h2>Create Profile</h2>
+  <input type="text" id="regUser" placeholder="Choose Username">
+  <input type="password" id="regPass" placeholder="Choose Password">
+  <button class="btn" onclick="register()">Sign Up</button>
+  <span class="auth-link" onclick="toggleAuth('Log')">Back to Login</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+if(!localStorage.getItem("vault_users")) localStorage.setItem("vault_users", JSON.stringify({}));
+if(localStorage.getItem("logged_user")) window.location.href = "dashboard.html";
+
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+function toggleAuth(mode) {
+  document.getElementById("boxLogin").style.display = mode === 'Reg' ? 'none' : 'block';
+  document.getElementById("boxRegister").style.display = mode === 'Reg' ? 'block' : 'none';
+}
+
+function register() {
+  const user = document.getElementById("regUser").value.trim(); const pass = document.getElementById("regPass").value.trim();
+  if(!user || !pass) return showToast("⚠️ Fill all fields");
+  let users = JSON.parse(localStorage.getItem("vault_users"));
+  if(users[user]) return showToast("⚠️ Username taken");
+  
+  users[user] = { password: pass, displayName: user, avatarUrl: "" };
+  localStorage.setItem("vault_users", JSON.stringify(users));
+  showToast("✓ Registered successfully!"); toggleAuth('Log');
+}
+
+function login() {
+  const user = document.getElementById("loginUser").value.trim(); const pass = document.getElementById("loginPass").value.trim();
+  let users = JSON.parse(localStorage.getItem("vault_users"));
+  if(users[user] && users[user].password === pass) {
+    localStorage.setItem("logged_user", user);
+    window.location.href = "dashboard.html";
+  } else { showToast("⚠️ Invalid credentials"); }
+}
+</script>
+</body>
+</html>
