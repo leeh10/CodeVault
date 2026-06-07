@@ -7,15 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #050505;
-  --surface: #0b0b0b;
-  --surface2: #111111;
-  --border: #161616;
-  --border2: #222222;
-  --text: #ffffff;
-  --muted: #444444;
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --surface2: #161616;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --text: #f0f0f0;
+  --muted: #555;
   --accent: #ffffff;
-  --accent2: #b3b3b3;
+  --accent2: #c8c8c8;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -29,103 +29,93 @@ body {
 }
 
 #canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-
-/* Rejilla Fina Premium */
 body::before {
   content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
-  background-size: 25px 25px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px; opacity: 0.5;
 }
 
-.container { position: relative; z-index: 2; max-width: 1050px; margin: 0 auto; padding: 50px 24px; }
+.container { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; padding: 60px 24px; }
 
 /* HEADER */
 header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 40px; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
+  margin-bottom: 45px; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
 }
 .logo-wrap { display: flex; align-items: center; gap: 14px; }
 .logo-icon {
-  width: 36px; height: 36px; background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #888;
+  width: 38px; height: 38px; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
-.logo { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: -1.5px; }
-.logo span { color: #3a3a3a; }
+.logo { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+.logo span { color: var(--muted); }
 
 /* AUTH BOXES */
 .auth-box {
-  max-width: 400px; margin: 100px auto; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 14px; padding: 45px 35px;
-  text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-  animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
+  max-width: 400px; margin: 80px auto; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 40px 30px;
+  text-align: center; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both;
 }
-.auth-box h2 { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
-.auth-p { color: #666; font-size: 13px; margin-bottom: 24px; }
+.auth-box h2 { font-family: 'JetBrains Mono', monospace; font-size: 22px; margin-bottom: 24px; }
 .auth-box input {
-  width: 100%; padding: 14px 16px; margin-bottom: 14px; background: var(--surface2);
+  width: 100%; padding: 12px 16px; margin-bottom: 16px; background: var(--surface2);
   border: 1px solid var(--border); border-radius: 8px; color: white;
-  font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: all 0.2s;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: border-color 0.2s;
 }
-.auth-box input:focus { border-color: var(--border2); background: #141414; outline: none; }
-.auth-link { color: #555; font-size: 12.5px; cursor: pointer; text-decoration: none; margin-top: 18px; display: inline-block; transition: color 0.2s; }
+.auth-box input:focus { border-color: #666; outline: none; }
+.auth-link { color: var(--muted); font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
 .auth-link:hover { color: var(--text); }
 
 /* LAYOUT */
-.dashboard-layout { display: none; grid-template-columns: 280px 1fr; gap: 24px; animation: fadeUp 0.8s cubic-bezier(.16,1,.3,1) both; }
-.sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px; height: fit-content; }
-.sidebar h3 { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; }
-
+.dashboard-layout { display: none; grid-template-columns: 280px 1fr; gap: 30px; animation: fadeUp 0.8s 0.1s cubic-bezier(.16,1,.3,1) both; }
+.sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.sidebar h3 { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
 .folder-list { list-style: none; }
 .folder-item {
   padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; margin-bottom: 8px; cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; transition: all 0.2s;
+  border-radius: 9px; margin-bottom: 10px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; font-size: 14px; transition: all 0.2s;
 }
-.folder-item:hover { border-color: var(--border2); background: #141414; }
-.folder-item.active { border-color: #333; background: #161616; font-weight: 600; }
-.folder-title-click { flex-grow: 1; display: flex; align-items: center; gap: 8px; }
+.folder-item:hover, .folder-item.active { border-color: var(--border2); background: #1c1c1c; }
+.delete-btn { background: transparent; color: #555; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 4px; transition: color 0.2s; }
+.delete-btn:hover { color: #e05555; }
 
-.delete-btn { background: transparent; color: #444; border: none; cursor: pointer; font-size: 12px; padding: 4px; transition: color 0.2s; }
-.delete-btn:hover { color: #ff4444; }
-
-.main-content { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 30px; min-height: 500px; }
-.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+.main-content { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; min-height: 450px; }
+.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
 .script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 
-/* TARJETAS PREMIUM DE SCRIPT */
 .script-card {
-  background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
-  padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 160px; transition: all 0.2s;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 150px; transition: border-color 0.2s;
 }
-.script-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-.script-card h4 { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
-.script-card p { font-family: 'JetBrains Mono', monospace; color: #444; font-size: 11px; margin-top: 4px; }
-.card-actions { display: flex; gap: 8px; margin-top: auto; }
+.script-card:hover { border-color: var(--border2); }
+.script-card h4 { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.script-card p { font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 11px; }
+.card-actions { display: flex; gap: 8px; margin-top: 15px; }
 
 /* BUTTONS */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: none; border-radius: 9px;
   padding: 10px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
-.btn-primary { background: #ffffff; color: #050505; }
-.btn-primary:hover { background: #e5e5e5; transform: translateY(-1px); }
-.btn-ghost { background: transparent; color: #777; border: 1px solid var(--border); }
-.btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
-.btn-danger { background: transparent; color: #444; border: 1px solid var(--border); }
-.btn-danger:hover { color: #ff4444; border-color: rgba(255, 68, 68, 0.2); background: rgba(255, 68, 68, 0.02); }
-.logout-btn { background: transparent; color: #444; border: 1px solid var(--border); padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.logout-btn:hover { color: #ff4444; border-color: rgba(255, 68, 68, 0.2); }
+.btn-primary { background: var(--text); color: #080808; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: #555; }
+.btn-danger { background: transparent; color: #555; border: 1px solid var(--border); }
+.btn-danger:hover { color: #e05555; border-color: #e0555544; }
+.logout-btn { background: transparent; color: #555; border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.logout-btn:hover { color: #e05555; border-color: #e0555533; }
 
 /* TOAST */
 .toast {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
-  background: #ffffff; color: #050505; font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 8px;
-  pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(.16,1,.3,1); z-index: 100;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  background: var(--text); color: #080808; font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 600; padding: 12px 22px; border-radius: 10px;
+  pointer-events: none; opacity: 0; transition: all 0.35s cubic-bezier(.16,1,.3,1); z-index: 100;
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-@keyframes fadeUp { from { opacity:0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
 </style>
 </head>
 <body>
@@ -140,8 +130,7 @@ header {
     </div>
     
     <div style="display: flex; gap: 10px; align-items: center;">
-      <!-- CORREGIDO: Se le puso display:none por defecto para que no salga en Login/Register -->
-      <a href="index.html" class="btn btn-ghost" id="btnEditorGlobal" style="display: none; padding: 8px 14px; font-size: 12px;">
+      <a href="index.html?from=dashboard" class="btn btn-ghost" id="btnEditorGlobal" style="display: none; padding: 8px 14px; font-size: 12px;">
         ⚙️ Open Editor
       </a>
       <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
@@ -149,33 +138,31 @@ header {
   </header>
 
   <div id="screenLogin" class="auth-box">
-    <h2>Secure Login</h2>
-    <div class="auth-p">Ingresa a tu búnker de scripts cifrados.</div>
+    <h2>Device Login</h2>
     <input type="text" id="loginUser" placeholder="Username">
     <input type="password" id="loginPass" placeholder="Password">
     <button class="btn btn-primary" style="width: 100%; margin-top: 5px;" onclick="login()">Unlock Vault</button>
-    <span class="auth-link" onclick="showScreen('Register')">¿No tienes cuenta? Regístrate aquí</span>
+    <span class="auth-link" onclick="showScreen('Register')">Register new account</span>
   </div>
 
   <div id="screenRegister" class="auth-box" style="display: none;">
     <h2>Create Profile</h2>
-    <div class="auth-p">Registra un usuario local para tus carpetas.</div>
     <input type="text" id="regUser" placeholder="Choose Username">
     <input type="password" id="regPass" placeholder="Choose Password">
     <button class="btn btn-primary" style="width: 100%; margin-top: 5px;" onclick="register()">Sign Up</button>
-    <span class="auth-link" onclick="showScreen('Login')">Volver al Login</span>
+    <span class="auth-link" onclick="showScreen('Login')">Back to Login</span>
   </div>
 
   <div id="screenDashboard" class="dashboard-layout">
     <div class="sidebar">
       <h3>📂 Folders</h3>
       <ul id="folderList" class="folder-list"></ul>
-      <button class="btn btn-ghost" style="width: 100%;" onclick="createNewFolder()">+ New Folder</button>
+      <button class="btn btn-ghost" onclick="createNewFolder()">+ New Folder</button>
     </div>
 
     <div class="main-content">
       <div class="content-header">
-        <h3 id="currentFolderName" style="font-family:'JetBrains Mono'; font-size:14px; color:#555; text-transform: uppercase; letter-spacing: 0.05em;">Selecciona una carpeta</h3>
+        <h3 id="currentFolderName" style="font-family:'JetBrains Mono'; font-size:15px; color:#666;">Select a folder</h3>
         <button id="newScriptBtn" class="btn btn-primary" style="display: none;" onclick="goToEditorForNewScript()">+ Add Script</button>
       </div>
       <div id="scriptGrid" class="script-grid"></div>
@@ -188,24 +175,24 @@ header {
 <script>
 /* Particle Engine */
 const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); let W, H;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; } resize(); window.addEventListener('resize', resize);
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; } resize(); addEventListener('resize', resize);
 class Particle {
   constructor() { this.reset(true); }
   reset(init) {
     this.x = Math.random() * W; this.y = init ? Math.random() * H : H + 10;
-    this.vx = (Math.random() - 0.5) * 0.2; this.vy = -(Math.random() * 0.25 + 0.05);
-    this.r = Math.random() * 1.1 + 0.3; this.alpha = Math.random() * 0.25 + 0.05; this.life = 0; this.maxLife = Math.random() * 600 + 300;
+    this.vx = (Math.random() - 0.5) * 0.25; this.vy = -(Math.random() * 0.3 + 0.05);
+    this.r = Math.random() * 1.2 + 0.3; this.alpha = Math.random() * 0.35 + 0.05; this.life = 0; this.maxLife = Math.random() * 600 + 300;
   }
   update() { this.x += this.vx; this.y += this.vy; this.life++; if (this.life > this.maxLife || this.y < -10) this.reset(false); }
   draw() { const p = this.life / this.maxLife; const fade = p < 0.1 ? p/0.1 : p > 0.8 ? 1-(p-0.8)/0.2 : 1; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,' + (this.alpha * fade) + ')'; ctx.fill(); }
 }
-const particles = Array.from({length:60}, () => new Particle());
+const particles = Array.from({length:100}, () => new Particle());
 (function animate() {
   ctx.clearRect(0,0,W,H);
   for (let i=0;i<particles.length;i++) {
     for (let j=i+1;j<particles.length;j++) {
-      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y; const d=Math.sqrt(dx*dx+dy*dy);
-      if(d<90){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.strokeStyle='rgba(255,255,255,'+(1-d/90)*0.02+')'; ctx.lineWidth=0.5; ctx.stroke(); }
+      const dx=particles[i].x-particles[j].value, dy=particles[i].y-particles[j].y; const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.strokeStyle='rgba(255,255,255,'+(1-d/100)*0.03+')'; ctx.lineWidth=0.5; ctx.stroke(); }
     }
   }
   particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate);
@@ -220,7 +207,7 @@ if(!localStorage.getItem("vault_scripts")) localStorage.setItem("vault_scripts",
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
 function getLoggedUser() { return sessionStorage.getItem("logged_user"); }
 
-// CORREGIDO: El botón global del editor ahora SÓLO se muestra en el Dashboard
+// MODIFICADO: Ahora el botón del editor también se oculta si no estás logueado
 function showScreen(screen) {
   document.getElementById("screenLogin").style.display = screen === 'Login' ? 'block' : 'none';
   document.getElementById("screenRegister").style.display = screen === 'Register' ? 'block' : 'none';
@@ -231,11 +218,11 @@ function showScreen(screen) {
 
 function register() {
   const user = document.getElementById("regUser").value.trim(); const pass = document.getElementById("regPass").value.trim();
-  if(!user || !pass) return showToast("⚠️ Rellena todos los campos");
+  if(!user || !pass) return showToast("⚠️ Fill all fields");
   let users = JSON.parse(localStorage.getItem("vault_users"));
-  if(users[user]) return showToast("⚠️ Nombre de usuario ya ocupado");
+  if(users[user]) return showToast("⚠️ Username taken");
   users[user] = pass; localStorage.setItem("vault_users", JSON.stringify(users));
-  showToast("✓ Perfil creado con éxito"); showScreen('Login');
+  showToast("✓ Registered successfully!"); showScreen('Login');
 }
 
 function login() {
@@ -243,12 +230,12 @@ function login() {
   let users = JSON.parse(localStorage.getItem("vault_users"));
   if(users[user] && users[user] === pass) {
     sessionStorage.setItem("logged_user", user); showScreen('Dashboard'); renderFolders();
-  } else { showToast("⚠️ Credenciales inválidas"); }
+  } else { showToast("⚠️ Invalid login credentials"); }
 }
 
 function logout() {
   sessionStorage.removeItem("logged_user"); currentFolderId = null;
-  document.getElementById("scriptGrid").innerHTML = ""; document.getElementById("currentFolderName").innerText = "Selecciona una carpeta";
+  document.getElementById("scriptGrid").innerHTML = ""; document.getElementById("currentFolderName").innerText = "Select a folder";
   document.getElementById("newScriptBtn").style.display = "none"; showScreen('Login');
 }
 
@@ -259,30 +246,25 @@ function renderFolders() {
   userFolders.forEach(folder => {
     const li = document.createElement("li");
     li.className = `folder-item ${currentFolderId === folder.id ? 'active' : ''}`;
-    li.innerHTML = `
-      <div class="folder-title-click" onclick="selectFolder('${folder.id}', '${folder.name}')">
-        <span>📁</span> <span>${folder.name}</span>
-      </div>
-      <button class="delete-btn" onclick="deleteFolder('${folder.id}', event)">✕</button>
-    `;
+    li.innerHTML = `<span onclick="selectFolder('${folder.id}', '${folder.name}')">📁 ${folder.name}</span><button class="delete-btn" onclick="deleteFolder('${folder.id}', event)">✕</button>`;
     listElement.appendChild(li);
   });
 }
 
 function createNewFolder() {
-  const name = prompt("Nombre de la nueva carpeta:"); if(!name || !name.trim()) return;
+  const name = prompt("Enter folder name:"); if(!name || !name.trim()) return;
   const folders = JSON.parse(localStorage.getItem("vault_folders"));
   folders.push({ id: "fold_" + Date.now(), name: name.trim(), username: getLoggedUser() });
   localStorage.setItem("vault_folders", JSON.stringify(folders)); renderFolders();
 }
 
 function deleteFolder(id, event) {
-  event.stopPropagation(); if(!confirm("¿Eliminar carpeta y todos sus scripts permanentemente?")) return;
+  event.stopPropagation(); if(!confirm("Delete folder and all its contents permanently?")) return;
   let folders = JSON.parse(localStorage.getItem("vault_folders"));
   localStorage.setItem("vault_folders", JSON.stringify(folders.filter(f => f.id !== id)));
   let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
   localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.folderId !== id)));
-  if(currentFolderId === id) { currentFolderId = null; document.getElementById("currentFolderName").innerText = "Selecciona una carpeta"; document.getElementById("newScriptBtn").style.display = "none"; }
+  if(currentFolderId === id) { currentFolderId = null; document.getElementById("currentFolderName").innerText = "Select a folder"; document.getElementById("newScriptBtn").style.display = "none"; }
   renderFolders(); renderScripts();
 }
 
@@ -294,53 +276,35 @@ function selectFolder(id, name) {
 function renderScripts() {
   const grid = document.getElementById("scriptGrid"); grid.innerHTML = ""; if(!currentFolderId) return;
   const scripts = JSON.parse(localStorage.getItem("vault_scripts"));
-  const folderScripts = scripts.filter(s => s.folderId === currentFolderId && s.username === getLoggedUser());
-  
-  if(folderScripts.length === 0) {
-    grid.innerHTML = `<div style="color:#333; font-size:12px; font-family:'JetBrains Mono'; grid-column:1/-1; text-align:center; padding:40px 0;">[ CARPETA VACÍA — AGREGA UN SCRIPT ]</div>`;
-    return;
-  }
-
+  const folderScripts = scripts.filter(s => s.folderId === currentFolderId);
   folderScripts.forEach(script => {
     const card = document.createElement("div"); card.className = "script-card";
-    card.innerHTML = `
-      <div>
-        <h4>${script.title || 'Untitled Script'}</h4>
-        <p style="color:#555; font-size:10px; margin-top:2px;">ID: ${script.id.substring(0,8)}...</p>
-      </div>
+    card.innerHTML = `<div><h4>${script.title}</h4><p>ID: ${script.id}</p></div>
       <div class="card-actions">
-        <button class="btn btn-ghost" style="padding:6px 12px; font-size:11px; flex:1;" onclick="editScriptInEditor('${script.id}')">Editar</button>
-        <button class="btn btn-danger" style="padding:6px 12px; font-size:11px;" onclick="deleteScript('${script.id}')">✕</button>
+        <button class="btn btn-ghost" style="padding:6px 12px; font-size:11px;" onclick="viewScript('${script.id}')">View/Edit</button>
+        <button class="btn btn-danger" style="padding:6px 12px; font-size:11px;" onclick="deleteScript('${script.id}')">Delete</button>
       </div>`;
     grid.appendChild(card);
   });
 }
 
-// CORREGIDO: Ahora sí redirige de forma forzada pasando la carpeta de forma limpia al editor
+// MODIFICADO: Para que al agregar un script nuevo desde la carpeta viaje con el pase del dashboard
 function goToEditorForNewScript() {
-  if(!currentFolderId) return showToast("⚠️ Selecciona una carpeta primero");
-  window.location.href = "index.html?folderId=" + currentFolderId;
+  window.location.href = `index.html?from=dashboard&folderId=${currentFolderId}`;
 }
 
-// CORREGIDO: Manda el id exacto del script que se quiere actualizar en el editor
-function editScriptInEditor(scriptId) {
-  window.location.href = "index.html?editId=" + scriptId;
+function viewScript(id) {
+  window.location.href = `view.html?id=${id}`;
 }
 
 function deleteScript(id) {
-  if(!confirm("¿Seguro que quieres borrar este script del panel?")) return;
+  if(!confirm("Delete this script?")) return;
   let scripts = JSON.parse(localStorage.getItem("vault_scripts"));
   localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.id !== id)));
-  renderScripts(); showToast("✓ Script eliminado");
+  renderScripts(); showToast("✓ Script deleted locally");
 }
 
-// Inicialización limpia de sesión
-if(sessionStorage.getItem("logged_user")) { 
-  showScreen('Dashboard'); 
-  renderFolders(); 
-} else {
-  showScreen('Login');
-}
+if(sessionStorage.getItem("logged_user")) { showScreen('Dashboard'); renderFolders(); }
 </script>
 </body>
 </html>
