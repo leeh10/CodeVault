@@ -649,11 +649,12 @@ function copyCode() {
 
   /* ——— CLEAR ——— */
   function clearEditor() {
-    codeEl.value = '';
-    document.getElementById('lineCount').textContent = '0 lines';
-    document.getElementById('result').style.style.display = 'none';
-    showToast('Editor cleared');
-  }
+  codeEl.value = '';
+  document.getElementById('lineCount').textContent = '0 lines';
+  document.getElementById('result').style.display = 'none'; // Corrección aquí
+  showToast('Editor cleared');
+}
+
 
   /* ==================================================================== */
   /*  NUEVO: CAPTURAR EL ID AUTOMÁTICAMENTE AL GUARDAR O CREAR UN SCRIPT  */
