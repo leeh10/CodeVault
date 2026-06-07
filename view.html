@@ -654,6 +654,7 @@ async function loadScript() {
 
   const rawUrlForExecutor = 'https://codevault-vlv1.onrender.com/raw/' + scriptId;
   const ls = 'loadstring(game:HttpGet("' + rawUrlForExecutor + '"))()';
+
   
   document.getElementById('lsCode').textContent = ls;
   document.getElementById('lsSection').style.display = 'block';
