@@ -9,10 +9,10 @@
 <script>
   // ── REGLA 1: DESVÍO INMEDIATO AL DASHBOARD SI NO VIENE DE ALLÍ ──
   const urlParams = new URLSearchParams(window.location.search);
-  const vieneDesdeDashboard = urlParams.get('from') === 'dashboard';
+  const vieneDesdeDashboard = urlParams.get('from') === 'login';
 
   if (!vieneDesdeDashboard) {
-    window.location.href = "dashboard.html";
+    window.location.href = "login.html";
   }
 </script>
 
