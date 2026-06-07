@@ -297,11 +297,14 @@ function toggleHamburgerMenu(open) { document.getElementById("hamburgerMenu").cl
 function logout() { localStorage.removeItem("logged_user"); window.location.href = "login.html"; }
 function linkAnotherProfile() { localStorage.removeItem("logged_user"); window.location.href = "login.html"; }
 
-// Renderiza de forma infalible tu foto desde la galería
+// Renderiza de forma infalible tu foto desde la galería y el nombre personalizado
 function loadUserAvatarHeader() {
   const users = JSON.parse(localStorage.getItem("vault_users")) || {};
-  if(users[activeUser] && users[activeUser].avatarUrl) {
-    document.getElementById("headerUserAvatar").src = users[activeUser].avatarUrl;
+  if(users[activeUser]) {
+    // Carga la foto si existe
+    if(users[activeUser].avatarUrl) {
+      document.getElementById("headerUserAvatar").src = users[activeUser].avatarUrl;
+    }
   }
 }
 
@@ -399,17 +402,20 @@ function deleteScript(id) {
   renderScripts(); showToast("✓ Script deleted");
 }
 
-loadUserAvatarHeader();
-renderFolders(); 
-renderAccountProfiles();
+// ── DISPARADOR ESTRUCTURADO DE CARGA SEGURA DE INTERFAZ ──
+document.addEventListener("DOMContentLoaded", () => {
+  loadUserAvatarHeader();
+  renderFolders(); 
+  renderAccountProfiles();
 
-const restoreFolderId = localStorage.getItem("last_active_folder");
-if(restoreFolderId) {
-  const folders = JSON.parse(localStorage.getItem("vault_folders")) || [];
-  const targeted = folders.find(f => f.id === restoreFolderId);
-  if(targeted) { selectFolder(targeted.id, targeted.name); }
-  localStorage.removeItem("last_active_folder");
-}
+  const restoreFolderId = localStorage.getItem("last_active_folder");
+  if(restoreFolderId) {
+    const folders = JSON.parse(localStorage.getItem("vault_folders")) || [];
+    const targeted = folders.find(f => f.id === restoreFolderId);
+    if(targeted) { selectFolder(targeted.id, targeted.name); }
+    localStorage.removeItem("last_active_folder");
+  }
+});
 </script>
 </body>
 </html>
