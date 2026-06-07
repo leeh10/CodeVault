@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CodeVault</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<script>
+  // Revisamos si en la URL dice "?from=dashboard"
+  const urlParams = new URLSearchParams(window.location.search);
+  const vieneDesdeDashboard = urlParams.get('from') === 'dashboard';
+
+  // Si NO viene desde el dashboard, lo mandamos para allá de inmediato
+  if (!vieneDesdeDashboard) {
+    window.location.href = "dashboard.html";
+  }
+</script>
 <style>
 :root {
   --bg: #080808;
