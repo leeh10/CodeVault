@@ -652,15 +652,16 @@ async function loadScript() {
 
   document.getElementById('scriptIdLabel').textContent = `#${scriptId.toUpperCase()}`;
 
+  // El ejecutor sigue usando el /raw/ normal para que le sirva la seguridad
   const rawUrlForExecutor = 'https://codevault-vlv1.onrender.com/raw/' + scriptId;
   const ls = 'loadstring(game:HttpGet("' + rawUrlForExecutor + '"))()';
 
-  
   document.getElementById('lsCode').textContent = ls;
   document.getElementById('lsSection').style.display = 'block';
 
   try {
-    const res = await fetch('https://codevault-vlv1.onrender.com/raw/' + scriptId);
+    // CAMBIO AQUÍ: Agregamos '/web' antes de '/raw/' para saltarnos la pasarela visual en tu app
+    const res = await fetch('https://codevault-vlv1.onrender.com/web/raw/' + scriptId);
     if (!res.ok) throw new Error();
     const code = await res.text();
     
@@ -674,6 +675,7 @@ async function loadScript() {
     showToast('⚠ Fetch aborted: Check Render instance');
   }
 }
+
 
 document.getElementById('code').addEventListener('input', function() {
   updateLineCount(this.value);
