@@ -20,7 +20,8 @@ async function saveScript() {
   }
 
   try {
-    const res = await fetch('https://codevault-gvyn.onrender.com/save', {
+    // Usamos tu servidor de Render activo
+    const res = await fetch('https://codevault-vlv1.onrender.com/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: code })
@@ -31,12 +32,12 @@ async function saveScript() {
     const data = await res.json();
     const id   = data.id;
 
-    // SOLUCIÓN MAESTRA: Enlaces usando tu dominio de GitHub (?raw=true) para burlar el bloqueo del ejecutor
+    // Estructuración de enlaces limpia hacia tu pasarela inteligente
     const viewUrl = 'https://leeh10.github.io/CodeVault/view.html?id=' + id;
-    const rawUrl  = 'https://leeh10.github.io/CodeVault/view.html?id=' + id + '&raw=true';
+    const rawUrl  = 'https://codevault-vlv1.onrender.com/raw/' + id;
     const ls      = 'loadstring(game:HttpGet("' + rawUrl + '"))()';
 
-    // Rellenamos los campos interactivos del nuevo diseño
+    // Rellenamos los campos interactivos del diseño
     document.getElementById('rawUrlText').textContent      = rawUrl;
     document.getElementById('loadstringText').textContent  = ls;
     document.getElementById('viewUrlText').textContent     = viewUrl;
@@ -50,7 +51,7 @@ async function saveScript() {
     
     if (typeof showToast === 'function') showToast('Script saved!');
 
-    // Guardar en almacenamiento local del dispositivo (tu nueva función de tracking)
+    // Guardar en almacenamiento local del dispositivo
     if (typeof registrarScriptId === 'function') {
       registrarScriptId(id);
     } else {
@@ -73,7 +74,7 @@ async function saveScript() {
   }
 }
 
-/* ── FUNCIONES DE COPIADO COMPLEMENTARIAS PARA LOS BOTONES NUEVOS ── */
+/* ── FUNCIONES DE COPIADO COMPLEMENTARIAS ── */
 
 function copyRawUrl() {
   const url  = document.getElementById('rawUrlText').textContent;
