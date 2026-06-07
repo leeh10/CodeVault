@@ -285,7 +285,6 @@ function executeAccountDestruction() {
     "> SHUTTING DOWN VAULT INSTANCE PERMANENTLY..."
   ];
 
-  // Bucle de cuenta regresiva de 5 segundos cambiando texto simulado
   const interval = setInterval(() => {
     countdown--;
     if (countdown > 0) {
@@ -305,9 +304,9 @@ function executeAccountDestruction() {
       let scripts = JSON.parse(localStorage.getItem("vault_scripts")) || [];
       localStorage.setItem("vault_scripts", JSON.stringify(scripts.filter(s => s.username !== activeUser)));
 
-      // Desloguear y mandar al Login / Dashboard limpio
+      // OJO AQUÍ: Eliminamos el usuario actual y mandamos directo al Dashboard Premium
       localStorage.removeItem("logged_user");
-      window.location.href = "login.html";
+      window.location.href = "dashboard.html"; 
     }
   }, 1000);
 }
