@@ -297,11 +297,11 @@ function toggleHamburgerMenu(open) { document.getElementById("hamburgerMenu").cl
 function logout() { localStorage.removeItem("logged_user"); window.location.href = "login.html"; }
 function linkAnotherProfile() { localStorage.removeItem("logged_user"); window.location.href = "login.html"; }
 
-// Renderiza de forma infalible tu foto desde la galería y el nombre personalizado
+
 function loadUserAvatarHeader() {
   const users = JSON.parse(localStorage.getItem("vault_users")) || {};
+  
   if(users[activeUser]) {
-    // Carga la foto si existe
     if(users[activeUser].avatarUrl) {
       document.getElementById("headerUserAvatar").src = users[activeUser].avatarUrl;
     }
@@ -317,12 +317,17 @@ function renderAccountProfiles() {
     const isCurrent = user === activeUser;
     const btn = document.createElement("button");
     btn.className = `account-item-btn ${isCurrent ? 'active-acc' : ''}`;
-    const displayAlias = usersObj[user].displayName || user;
+    
+    // CONTROL TOTAL ANTE CUENTAS VIEJAS: Si no existe el nodo interno o el displayName, usa su ID/nombre de usuario original
+    const displayAlias = (usersObj[user] && usersObj[user].displayName) ? usersObj[user].displayName : user;
+    
     btn.innerHTML = `👤 <span>${displayAlias}</span> ${isCurrent ? '<span class="account-badge-current">ACTIVE</span>' : ''}`;
     if(!isCurrent) { btn.onclick = () => switchAccountSimulation(user); }
     container.appendChild(btn);
   });
 }
+
+
 
 function switchAccountSimulation(targetUser) {
   toggleHamburgerMenu(false);
