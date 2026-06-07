@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CodeVault — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2%2Ffamily=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <script>
   // ── REGLA 1: DESVÍO INMEDIATO AL DASHBOARD SI NO VIENE DE ALLÍ ──
@@ -411,6 +411,7 @@ footer {
     </div>
   </div>
 
+  <!-- RESULT PANEL -->
   <div id="result" class="result">
     <div class="result-header">
       <div class="status-row">
@@ -421,6 +422,7 @@ footer {
     </div>
     <div class="result-body">
 
+      <!-- RAW URL -->
       <div class="info-row">
         <div class="row-label">Raw URL</div>
         <div class="code-block">
@@ -432,6 +434,7 @@ footer {
         </div>
       </div>
 
+      <!-- LOADSTRING -->
       <div class="info-row">
         <div class="row-label">Loadstring · executor ready</div>
         <div class="code-block">
@@ -443,6 +446,7 @@ footer {
         </div>
       </div>
 
+      <!-- VIEW URL -->
       <div class="info-row">
         <div class="row-label">View URL</div>
         <div class="code-block">
@@ -454,6 +458,7 @@ footer {
         </div>
       </div>
 
+      <!-- VIEW LINK -->
       <a id="viewLink" class="view-link-btn" href="#" target="_blank">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         Open script page
@@ -548,6 +553,7 @@ function animateCopyBtn(btn, orig) {
 
 /* ── MODIFICACIÓN: ALMACENAMIENTO DE ARCHIVOS FÍSICOS LOCALES ── */
 async function guardarArchivoLocal(idScript, contenido) {
+  // Comprobamos si el navegador del celular soporta acceso al sistema de archivos
   if ('showSaveFilePicker' in window) {
     try {
       const opciones = {
@@ -566,6 +572,7 @@ async function guardarArchivoLocal(idScript, contenido) {
       console.log('Guardado cancelado o no soportado en este flujo.');
     }
   } else {
+    // Alternativa compatible 100% con CUALQUIER celular (Android/iOS): Descarga forzada automática en descargas/documentos
     const blob = new Blob([contenido], { type: 'text/plain' });
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(blob);
@@ -581,23 +588,6 @@ async function guardarArchivoLocal(idScript, contenido) {
 async function saveScript() {
   const code = codeEl.value.trim();
   if (!code) { showToast('Paste a script first'); return; }
-
-  // ── FILTRO ANTI-HTML Y VALIDACIÓN DE SINTAXIS LUA ──
-  const tieneHtml = /<[a-z][\s\S]*>/i.test(code) || code.includes("</html>") || code.includes("</div>") || code.includes("</script>");
-  
-  // Lista de patrones comunes y palabras clave que demuestran que es un Script de Lua
-  const palabrasLua = ["local ", "function", "end", "then", "if ", "while ", "print", "game:", "HttpGet", "workspace", "task."];
-  const contieneLua = palabrasLua.some(patron => code.toLowerCase().includes(patron.toLowerCase())) || code.startsWith("--");
-
-  if (tieneHtml) {
-    showToast('⚠️ Error: HTML detectado. Solo se permiten scripts Lua.');
-    return;
-  }
-
-  if (!contieneLua) {
-    showToast('⚠️ Error: No parece código Lua válido.');
-    return;
-  }
 
   const btn = document.getElementById('btnSaveScript');
   btn.textContent = 'Saving...';
@@ -615,10 +605,13 @@ async function saveScript() {
     const data = await res.json();
     const id   = data.id;
 
+    // Guardado automático del ID en el LocalStorage local
     localStorage.setItem('idUsuario', id);
 
+    // LLAMADA AL SISTEMA FÍSICO: Guarda el archivo .lua en la carpeta local de tu almacenamiento
     await guardarArchivoLocal(id, code);
 
+    // Ajuste de Enlaces Limpios apuntando directo a Render para executors
     const viewUrl = 'https://leeh10.github.io/CodeVault/view.html?id=' + id;
     const rawUrl  = 'https://codevault-vlv1.onrender.com/raw/' + id;
     const ls      = 'loadstring(game:HttpGet("' + rawUrl + '"))()';
