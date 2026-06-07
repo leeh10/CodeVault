@@ -438,6 +438,29 @@ footer {
   animation: fadeUp 0.8s 0.3s cubic-bezier(.16,1,.3,1) both;
 }
 </style>
+  <script>
+  // INTERCEPTOR PARA EL EJECUTOR DE ROBLOX
+  const urlParams = new URLSearchParams(window.location.search);
+  const idScript = urlParams.get('id');
+  const esRawMode = urlParams.get('raw') === 'true';
+
+  if (esRawMode && idScript) {
+    // Pedimos el código real a tu Render en segundo plano de inmediato
+    fetch('https://codevault-gvyn.onrender.com/raw/' + idScript)
+      .then(res => res.text())
+      .then(luaCode => {
+        // Limpiamos el navegador por completo y pintamos SOLO el script de Lua puro
+        document.open();
+        document.write(luaCode);
+        document.close();
+      })
+      .catch(() => {
+        document.open();
+        document.write('-- Error: No se pudo conectar con el servidor CodeVault.');
+        document.close();
+      });
+  }
+</script>
 </head>
 <body>
 
