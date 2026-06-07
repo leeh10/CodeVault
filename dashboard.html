@@ -17,20 +17,7 @@
   --accent: #ffffff;
   --accent2: #c8c8c8;
 }
-/* Tu CSS original sigue aquí abajo... */
-</style>
-</head>
-<body>
 
-  <a href="index.html?from=dashboard" class="btn btn-primary">
-    Ir al Editor de Scripts
-  </a>
-
-  <script>
-    function irAlEditor() {
-      window.location.href = "index.html?from=dashboard";
-    }
-  </script>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   background: var(--bg);
@@ -117,7 +104,7 @@ header {
 .btn-ghost:hover { color: var(--text); border-color: #555; }
 .btn-danger { background: transparent; color: #555; border: 1px solid var(--border); }
 .btn-danger:hover { color: #e05555; border-color: #e0555544; }
-.logout-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.logout-btn { background: transparent; color: #555; border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .logout-btn:hover { color: #e05555; border-color: #e0555533; }
 
 /* TOAST */
@@ -141,7 +128,13 @@ header {
       <div class="logo-icon">⬡</div>
       <div class="logo">Code<span>Vault</span></div>
     </div>
-    <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <a href="index.html?from=dashboard" class="btn btn-ghost" id="btnEditorGlobal" style="display: none; padding: 8px 14px; font-size: 12px;">
+        ⚙️ Open Editor
+      </a>
+      <button id="logoutBtn" class="logout-btn" style="display:none;" onclick="logout()">Logout</button>
+    </div>
   </header>
 
   <div id="screenLogin" class="auth-box">
@@ -198,7 +191,7 @@ const particles = Array.from({length:100}, () => new Particle());
   ctx.clearRect(0,0,W,H);
   for (let i=0;i<particles.length;i++) {
     for (let j=i+1;j<particles.length;j++) {
-      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y; const d=Math.sqrt(dx*dx+dy*dy);
+      const dx=particles[i].x-particles[j].value, dy=particles[i].y-particles[j].y; const d=Math.sqrt(dx*dx+dy*dy);
       if(d<100){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.strokeStyle='rgba(255,255,255,'+(1-d/100)*0.03+')'; ctx.lineWidth=0.5; ctx.stroke(); }
     }
   }
@@ -214,11 +207,13 @@ if(!localStorage.getItem("vault_scripts")) localStorage.setItem("vault_scripts",
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
 function getLoggedUser() { return sessionStorage.getItem("logged_user"); }
 
+// MODIFICADO: Ahora el botón del editor también se oculta si no estás logueado
 function showScreen(screen) {
   document.getElementById("screenLogin").style.display = screen === 'Login' ? 'block' : 'none';
   document.getElementById("screenRegister").style.display = screen === 'Register' ? 'block' : 'none';
   document.getElementById("screenDashboard").style.display = screen === 'Dashboard' ? 'grid' : 'none';
   document.getElementById("logoutBtn").style.display = screen === 'Dashboard' ? 'block' : 'none';
+  document.getElementById("btnEditorGlobal").style.display = screen === 'Dashboard' ? 'inline-flex' : 'none';
 }
 
 function register() {
@@ -293,8 +288,9 @@ function renderScripts() {
   });
 }
 
+// MODIFICADO: Para que al agregar un script nuevo desde la carpeta viaje con el pase del dashboard
 function goToEditorForNewScript() {
-  window.location.href = `index.html?folderId=${currentFolderId}`;
+  window.location.href = `index.html?from=dashboard&folderId=${currentFolderId}`;
 }
 
 function viewScript(id) {
