@@ -51,7 +51,31 @@ async function saveScript() {
     
     if (typeof showToast === 'function') showToast('Script saved!');
 
-    // Guardar en almacenamiento local del dispositivo
+    // ── VINCULACIÓN CON EL DASHBOARD Y SUS CARPETAS ──
+    const urlParams = new URLSearchParams(window.location.search);
+    const folderId = urlParams.get('folderId');
+    const loggedUser = sessionStorage.getItem("logged_user");
+
+    if (folderId && loggedUser) {
+      // Obtenemos el baúl de scripts locales para el panel
+      let vaultScripts = JSON.parse(localStorage.getItem("vault_scripts")) || [];
+      
+      // Pedimos un título personalizado para identificar la tarjeta en el panel
+      const scriptTitle = prompt("Ponle un nombre a tu Script para el Dashboard:") || "Nuevo Script";
+      
+      // Añadimos el script estructurado al almacén del dashboard
+      vaultScripts.push({
+        id: id,                  // Vinculado al ID único de tu servidor de Render
+        folderId: folderId,      // Vinculado a la carpeta actual de la que vienes
+        username: loggedUser,    // Vinculado a la sesión de tu cuenta
+        title: scriptTitle.trim(),
+        code: code               // Guardamos copia del código original para permitir re-editarlo
+      });
+      
+      localStorage.setItem("vault_scripts", JSON.stringify(vaultScripts));
+    }
+
+    // Guardar ID general en almacenamiento local del dispositivo (Tracking alternativo)
     if (typeof registrarScriptId === 'function') {
       registrarScriptId(id);
     } else {
