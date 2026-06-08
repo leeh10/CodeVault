@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { v4: uuid } = require("uuid");
-const fetch = require("node-fetch"); // CORRECCIÓN CLAVE PARA EVITAR CRASH EN RENDER
+const fetch = require("node-fetch"); // Esto salva el arranque en Render con versiones viejas
 
 const app = express();
 
