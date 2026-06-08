@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
     res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
-// RUTA PARA GUARDAR SCRIPTS
+// RUTA PARA GUARDAR SCRIPTS NUEVOS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -27,6 +27,31 @@ app.post("/save", async (req, res) => {
     } catch (error) {
         console.error("Error al guardar:", error.message);
         res.status(500).json({ success: false, error: "Error interno" });
+    }
+});
+
+// RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE SIN CAMBIAR EL ID
+app.put("/update/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const scriptCode = req.body.code;
+
+        if (!scriptCode) {
+            return res.status(400).json({ success: false, error: "No code provided" });
+        }
+
+        const payload = {
+            code: scriptCode,
+            updatedAt: new Date().toISOString()
+        };
+
+        // Hacemos un PATCH para sobreescribir solo el código y la fecha sin romper la seguridad
+        await axios.patch(`${REALTIME_DB_URL}/${id}.json`, payload);
+
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error("Error al actualizar en Realtime DB:", error.message);
+        res.status(500).json({ success: false, error: "Error interno al actualizar" });
     }
 });
 
