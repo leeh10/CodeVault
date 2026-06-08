@@ -60,16 +60,14 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.5 (COMPATIBILIDAD GRÁFICA Y BLINDAJE ANTI-RAM) ---
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.1 ---
 function militaryObfuscate(code) {
-    const xorKey = crypto.randomInt(30, 225);
-    const shiftKey = crypto.randomInt(5, 17);
+    const xorKey = crypto.randomInt(15, 235);
+    const shiftKey = crypto.randomInt(5, 20);
     
-    // Mantenemos el código puro. Sin añadir "script = nil" para no romper referencias de las UIs nativas.
     const codeBuffer = Buffer.from(code, 'utf8');
     const protectedBuffer = Buffer.alloc(codeBuffer.length);
     
-    // Algoritmo matemático simétrico posicional inverso
     for (let i = 0; i < codeBuffer.length; i++) {
         let processed = codeBuffer[i] ^ xorKey;
         processed = (processed + shiftKey) % 256; 
@@ -79,12 +77,10 @@ function militaryObfuscate(code) {
     const hexData = protectedBuffer.toString('hex');
     const scrambledHex = hexData.split('').reverse().join('');
 
-    // Matriz de ruido e inyección de datos basura para romper analizadores estáticos de firmas
     let junkCode = "";
-    for(let i = 0; i < 40; i++) {
+    for(let i = 0; i < 35; i++) {
         const fakeHex = crypto.randomBytes(4).toString('hex');
-        const fakeData = crypto.randomBytes(4).toString('hex');
-        junkCode += `local _0xErr_${fakeHex} = "${fakeData}";\n`;
+        junkCode += `local _0xErr_${fakeHex} = function() return "${crypto.randomBytes(8).toString('base64')}" end;\n`;
     }
 
     return {
@@ -95,7 +91,7 @@ function militaryObfuscate(code) {
     };
 }
 
-// RUTA CENTRAL CON FILTROS ANTI-BOT Y CARGA ULTRA-ESTABLE
+// RUTA PRINCIPAL CON SISTEMA DE DEFENSAS ACTIVO
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -123,13 +119,13 @@ app.get("/raw/:id", async (req, res) => {
     ▄▀█ ▄▄▀█▄▄ █▀█ ▄▄▀█▄▄ █░█ ▄▄▀█▄▄ █░█ █░░ ▀█▀
     █▀█ █▄█▄▄█ █▄█ █▄█▄▄█ ▀▄▀ █▀█▀▄█ █▄█ █▄▄ ░█░
    
-   [ PREMIUM MILITARY SHIELD V9.5 — BRANDING: CODEVAULT ]
-   [ ANTI-RAM MEMORY EVAPORATION & UI COMPATIBILITY LAYER ]
+   [ PREMIUM MILITARY SHIELD V9.1 — BRANDING: CODEVAULT ]
+   [ SECURITY INTEGRITY SYSTEM ENFORCED BY CODEVAULT INTERNALS ]
 ]]
 
 ${obf.junk}
 
--- Resguardo blindado de llamadas nativas de bajo nivel
+-- Resguardo blindado de funciones nativas locales
 local _r_gsub = string.gsub
 local _r_reverse = string.reverse
 local _r_char = string.char
@@ -141,29 +137,22 @@ local _0xStreamContainer = "${obf.stream}"
 local _0xXorKey = ${obf.key1}
 local _0xShiftKey = ${obf.key2}
 
--- Validación de entorno ágil
-local isGameEnv = _r_pcall(function() return game:IsA("DataModel") end)
-if not isGameEnv then
-    while true do end
-end
-
--- Ejecución aislada dentro de un entorno controlado
-local executionSuccess, loaderFunction = _r_pcall(function()
-    local normalHex = _r_reverse(_0xStreamContainer)
+local function _0xCV_ExecutePipeline(stream, k1, k2)
+    local normalHex = _r_reverse(stream)
     local cleanBytes = {}
     local index = 1
     
     _r_gsub(normalHex, "..", function(byte)
         local rawByte = _r_tonumber(byte, 16)
-        local unshifted = (rawByte - _0xShiftKey) % 256
+        local unshifted = (rawByte - k2) % 256
         if unshifted < 0 then unshifted = unshifted + 256 end
         
         local decryptedByte
         if _r_bxor then
-            decryptedByte = _r_bxor(unshifted, _0xXorKey)
+            decryptedByte = _r_bxor(unshifted, k1)
         else
             local p, c = 1, 0
-            local a, b = unshifted, _0xXorKey
+            local a, b = unshifted, k1
             while a > 0 or b > 0 do
                 local ra, rb = a % 2, b % 2
                 if ra ~= rb then c = c + p end
@@ -176,49 +165,39 @@ local executionSuccess, loaderFunction = _r_pcall(function()
         index = index + 1
     end)
     
-    local rawString = table.concat(cleanBytes)
-    local compiled, err = loadstring(rawString)
-    
-    -- BLINDAJE RADICAL ANTI-RAM INTERNO: Sobrescribimos el string plano con bytes nulos antes de recolectar
-    rawString = string.rep("\\0", #rawString)
-    rawString = nil
-    cleanBytes = nil
-    normalHex = nil
-    _0xStreamContainer = nil
-    
-    if not compiled then error(err or "Failed to compile bytecode source.") end
-    return compiled
+    return table.concat(cleanBytes)
+end
+
+-- CONTROL ANTI-BOT ADAPTATIVO
+local isGameEnv = pcall(function() return game:IsA("DataModel") end)
+if not isGameEnv then
+    while true do end
+end
+
+-- USAMOS TU TUBERÍA ORIGINAL DE EJECUCIÓN ESTABLE
+local isExecutionSafe, runtimeScript = _r_pcall(function()
+    return _0xCV_ExecutePipeline(_0xStreamContainer, _0xXorKey, _0xShiftKey)
 end)
 
--- Purga de variables globales del cargador criptográfico para liberar la RAM por completo
-_0xStreamContainer = nil
-_0xXorKey = nil
-_0xShiftKey = nil
-
-if executionSuccess and loaderFunction then
-    -- Forzamos la recolección total de basura antes de iniciar el código original
+if isExecutionSafe and runtimeScript and #runtimeScript > 0 then
+    -- CONEXIÓN DE BLINDAJE IN SITU:
+    -- Compilamos la cadena a bytecode inmediatamente usando loadstring nativo
+    local compiledFunc = loadstring(runtimeScript)
+    
+    -- EVAPORACIÓN ULTRA RÁPIDA: Destruimos el string plano de la RAM ANTES de ejecutar el script
+    runtimeScript = nil
+    _0xStreamContainer = nil
+    _0xCV_ExecutePipeline = nil
     collectgarbage("collect")
     
-    -- Lanzamiento asíncrono seguro para prevenir congelamiento de hilos y cargar interfaces fluidas
-    if task and task.defer then
-        task.defer(function()
-            local success, runError = _r_pcall(loaderFunction)
-            if not success then
-                warn("[CODEVAULT]: Runtime warning: " .. tostring(runError))
-            end
-            loaderFunction = nil
-            collectgarbage("collect")
-        end)
+    if compiledFunc then
+        -- Ejecuta el script original con sus entornos globales e interfaces intactas
+        compiledFunc()
     else
-        local success, runError = _r_pcall(loaderFunction)
-        if not success then
-            warn("[CODEVAULT]: Runtime warning: " .. tostring(runError))
-        end
-        loaderFunction = nil
-        collectgarbage("collect")
+        warn("[CODEVAULT]: Compilation block error.")
     end
 else
-    warn("[CODEVAULT]: Shield protection active. Environment blocked or corrupted.")
+    warn("[CODEVAULT]: Execution environment blocked.")
 end`;
 
             res.setHeader('Content-Type', 'text/plain');
