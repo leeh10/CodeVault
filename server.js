@@ -3,7 +3,7 @@ const cors = require("cors");
 const { v4: uuid } = require("uuid");
 const axios = require("axios");
 const crypto = require("crypto");
-const zlib = require("zlib"); // Para compresión binaria pesada
+const zlib = require("zlib"); 
 
 const app = express();
 app.use(cors());
@@ -61,29 +61,29 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE PROTECCIÓN MILITAR CRASH-BOTS V8.0 ---
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.0 ---
 function militaryObfuscate(code) {
-    // 1. Comprimir el código original usando Deflate (Gzip raw) para encoger los bytes
-    const compressedBuffer = zlib.deflateRawSync(Buffer.from(code, 'utf8'));
+    // 1. Cifrado previo XOR Dinámico con clave aleatoria
+    const secretKey = crypto.randomInt(10, 240);
+    const codeBuffer = Buffer.from(code, 'utf8');
+    const xorBuffer = Buffer.alloc(codeBuffer.length);
     
-    // 2. Generar llave matemática aleatoria
-    const secretKey = crypto.randomInt(5, 250);
-    
-    // 3. Aplicar cifrado XOR al buffer comprimido
-    const xorBuffer = Buffer.alloc(compressedBuffer.length);
-    for (let i = 0; i < compressedBuffer.length; i++) {
-        xorBuffer[i] = compressedBuffer[i] ^ secretKey;
+    for (let i = 0; i < codeBuffer.length; i++) {
+        xorBuffer[i] = codeBuffer[i] ^ secretKey;
     }
 
-    // 4. Pasar a Hexadecimal e invertir el resultado
-    const hexData = xorBuffer.toString('hex');
+    // 2. Comprimir el flujo XOR para destruir firmas de código plano
+    const compressedBuffer = zlib.deflateRawSync(xorBuffer);
+
+    // 3. Pasar a Hexadecimal e invertir completamente el string
+    const hexData = compressedBuffer.toString('hex');
     const scrambledHex = hexData.split('').reverse().join('');
 
-    // 5. INYECCIÓN DE BASURA PESADA (Junk Crash Matrix)
-    // Generamos un bloque masivo de comentarios corruptos y variables locas para ahogar al bot
+    // 4. GENERADOR DE JUNK MATRIZ (Trampa para formateadores automáticos de bots)
     let junkCode = "";
-    for(let i = 0; i < 80; i++) {
-        junkCode += `local _0xTrash_${crypto.randomBytes(4).toString('hex')} = "${crypto.randomBytes(16).toString('base64')}"\n`;
+    for(let i = 0; i < 40; i++) {
+        const fakeArray = Array.from({length: 6}, () => `0x${crypto.randomBytes(1).toString('hex')}`).join(', ');
+        junkCode += `local _0xErr_${crypto.randomBytes(3).toString('hex')} = {${fakeArray}}; \n`;
     }
 
     return {
@@ -96,7 +96,6 @@ function militaryObfuscate(code) {
 // RUTA PRINCIPAL CON SISTEMA DE DEFENSAS ACTIVO
 app.get("/raw/:id", async (req, res) => {
     try {
-        // Bloqueo inmediato de librerías de scraping comunes
         const userAgent = req.headers['user-agent'] || '';
         if (userAgent.includes('python') || userAgent.includes('node') || userAgent.includes('axios') || userAgent.includes('requests')) {
             return res.status(403).send("Forbidden: Security Violation.");
@@ -118,67 +117,86 @@ app.get("/raw/:id", async (req, res) => {
 
             const obf = militaryObfuscate(code);
 
-            // Generamos la carga destructiva para bots pero nativa para Luau
-            const secureLuaPayload = `-- [[ CODEVAULT SHIELD MILITARY HARDENED v8.0 ]]
--- SYSTEM INTEGRITY VERIFICATION BLOCKED --
+            // Generamos la carga segura con la marca oficial de CODEVAULT
+            const secureLuaPayload = `--[[
+    ▄▀█ balance▀█▄▄ █▀█ balance█▀▄ █░█ balance▄▀█ balance█░█ █░░ balance▀█▀
+    █▀█ balance█▄█ balance█▄█ balance█▄▀ ▀▄▀ balance█▀█ balance█▄█ █▄▄ balance░█░
+   
+   [ PREMIUM MILITARY SHIELD V9.0 — BRANDING: CODEVAULT V9 ]
+   [ SECURITY INTEGRITY SYSTEM ENFORCED BY CODEVAULT INTERNALS ]
+]]
 
 ${obf.junk}
 
--- Resguardo criptográfico nativo de alta velocidad
+-- Resguardo criptográfico local nativo
 local _r_gsub = string.gsub
 local _r_reverse = string.reverse
 local _r_char = string.char
 local _r_tonumber = tonumber
 local _r_pcall = pcall
+local _r_bxor = (bit32 and bit32.bxor)
 
-local _0xStream = "${obf.stream}"
-local _0xKey = ${obf.key}
+local _0xStreamContainer = "${obf.stream}"
+local _0xKeySignature = ${obf.key}
 
-local function _0xCV_Decrypt(data, key)
-    local step1 = _r_reverse(data)
-    local cleanHex = {}
+local function _0xCV_ExecutePipeline(stream, key)
+    -- Paso 1: Voltear el string al orden correcto
+    local normalHex = _r_reverse(stream)
+    
+    -- Paso 2: Reconstrucción veloz por tablas nativas
+    local cleanBytes = {}
     local index = 1
     
-    -- Parseo de bytes optimizado por tablas sin lag
-    _r_gsub(cleanHex, "..", function(byte)
+    _r_gsub(normalHex, "..", function(byte)
         local rawByte = _r_tonumber(byte, 16)
-        -- Des-XOR Aritmético Veloz
-        local p, c = 1, 0
-        local a, b = rawByte, key
-        while a > 0 or b > 0 do
-            local ra, rb = a % 2, b % 2
-            if ra ~= rb then c = c + p end
-            a, b, p = (a - ra) / 2, (b - rb) / 2, p * 2
+        local decryptedByte
+        
+        if _r_bxor then
+            decryptedByte = _r_bxor(rawByte, key)
+        else
+            -- Algoritmo rápido de XOR aritmético sin dependencias externas
+            local p, c = 1, 0
+            local a, b = rawByte, key
+            while a > 0 or b > 0 do
+                local ra, rb = a % 2, b % 2
+                if ra ~= rb then c = c + p end
+                a, b, p = (a - ra) / 2, (b - rb) / 2, p * 2
+            end
+            decryptedByte = c
         end
-        cleanHex[index] = _r_char(c)
+        
+        cleanBytes[index] = _r_char(decryptedByte)
         index = index + 1
     end)
     
-    -- Unimos el stream de bytes
-    local packedSource = table.concat(cleanHex)
+    local rawDecompressed = table.concat(cleanBytes)
     
-    -- Descomprimimos usando la API nativa de Roblox (Zlib Deflate)
-    -- Esto es IMPOSIBLE de emular por un bot de Discord fuera del juego
-    if game and game.HttpService then
-        return game:GetService("HttpService"):JSONDecode('{"d":' .. packedSource .. '}').d
-    else
-        -- Bypass interno alternativo por si ejecutan en motores puros de Luau
-        return packedSource
+    -- Paso 3: Descompresión nativa mediante entorno de ejecución (Bypass de Lag)
+    local finalSource = rawDecompressed
+    local decompressor = syn and syn.decompress or crypt and (crypt.lz4decompress or crypt.custom_decompress)
+    
+    if decompressor then
+        local successDecompress, result = _r_pcall(decompressor, rawDecompressed)
+        if successDecompress then finalSource = result end
+    end
+    
+    return finalSource
+end
+
+-- FILTRO DE ENTORNO FAKE / BOTS DE DISCORD
+if not game or not game:GetService("Players") then
+    while true do 
+        local _ = math.sin(100) * math.cos(200)
     end
 end
 
--- DETECCIÓN DE ENTORNO FAKE / BOTS DE DISCORD
-if not game or not game:GetService("Players") or not game:GetService("RunService") then
-    while true do print("CodeVault: Environment Corrupted.") end
-end
-
-local isSafe, finalScript = _r_pcall(function()
-    return _0xCV_Decrypt(_0xStream, _0xKey)
+local isExecutionSafe, runtimeScript = _r_pcall(function()
+    return _0xCV_ExecutePipeline(_0xStreamContainer, _0xKeySignature)
 end)
 
-if isSafe and finalScript then
+if isExecutionSafe and runtimeScript then
     local run = loadstring or _r_pcall
-    run(finalScript)()
+    run(runtimeScript)()
 else
     while true do end
 end`;
