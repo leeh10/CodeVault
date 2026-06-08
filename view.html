@@ -7,13 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <script>
-  // ── INTERCEPTOR AUTOMÁTICO PARA EJECUTORES DE ROBLOX (MODO RAW) ──
   const urlParams = new URLSearchParams(window.location.search);
   const idScript = urlParams.get('id');
   const esRawMode = urlParams.get('raw') === 'true';
 
   if (esRawMode && idScript) {
-    fetch('https://codevault-gvyn.onrender.com/raw/' + idScript)
+    fetch('https://codevault-vlv1.onrender.com/raw/' + idScript)
       .then(res => res.text())
       .then(luaCode => {
         document.open();
@@ -79,7 +78,6 @@ body::before {
   padding: 40px 24px 80px;
 }
 
-/* BACK LINK */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -95,7 +93,6 @@ body::before {
 .back-link:hover { color: var(--text); }
 .back-link svg { width: 12px; height: 12px; }
 
-/* HEADER */
 header {
   display: flex;
   align-items: center;
@@ -140,7 +137,6 @@ header {
   gap: 8px;
 }
 
-/* STATUS BAR */
 .status-bar {
   display: flex;
   align-items: center;
@@ -185,7 +181,6 @@ header {
   color: #333;
 }
 
-/* EDITOR CARD */
 .editor-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -281,7 +276,6 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
   flex-wrap: wrap;
 }
 
-/* BUTTONS */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -344,7 +338,6 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
 }
 .btn-danger:hover { color: #e05555; border-color: #e0555544; transform: translateY(-1px); }
 
-/* LOADSTRING SECTION */
 .ls-section {
   margin-top: 20px;
   animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) both;
@@ -425,7 +418,6 @@ textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3
 .ls-copy-btn.copied { color: #4caf50; }
 .ls-copy-btn svg { width:14px; height:14px; }
 
-/* TOAST */
 .toast {
   position: fixed;
   bottom: 30px;
@@ -466,7 +458,6 @@ footer {
 <canvas id="canvas"></canvas>
 
 <div class="container">
-
   <a class="back-link" href="index.html?from=dashboard">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
     back to vault
@@ -546,7 +537,6 @@ footer {
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── BACKGROUND PARTICLES SYSTEM ── */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let W, H, particles = [];
@@ -608,7 +598,6 @@ function drawConnections() {
   requestAnimationFrame(animate);
 })();
 
-/* ── UI CORE STATE ── */
 let scriptId = '';
 let originalCode = '';
 
@@ -639,10 +628,8 @@ function updateLineCount(val) {
   document.getElementById('lineCount').textContent = `${lines} line${lines === 1 ? '' : 's'}`;
 }
 
-/* ── DATA FETCH OPTIMIZADO CON AUTO-REINTENTO ── */
 async function loadScript() {
   scriptId = getId();
-  
   if (!scriptId) { 
     setStatus('error', 'No local ID linked'); 
     document.getElementById('code').placeholder = "-- Create a script in the main dashboard to generate a local synchronization ID...";
@@ -651,7 +638,6 @@ async function loadScript() {
   }
 
   document.getElementById('scriptIdLabel').textContent = `#${scriptId.toUpperCase()}`;
-
   const rawUrlForExecutor = 'https://codevault-vlv1.onrender.com/raw/' + scriptId;
   const ls = 'loadstring(game:HttpGet("' + rawUrlForExecutor + '"))()';
 
@@ -665,7 +651,6 @@ async function loadScript() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 40000);
-
       setStatus('loading', intentos > 0 ? `Waking up server (Attempt ${intentos + 1})...` : 'Synchronizing pipeline...');
 
       const res = await fetch('https://codevault-vlv1.onrender.com/web/raw/' + scriptId, { signal: controller.signal });
@@ -690,7 +675,6 @@ async function loadScript() {
       }
     }
   }
-
   intentarFetch();
 }
 
@@ -698,7 +682,6 @@ document.getElementById('code').addEventListener('input', function() {
   updateLineCount(this.value);
 });
 
-/* ── INTERFACES & CONTROLS ── */
 function enableEdit() {
   const ta = document.getElementById('code');
   ta.readOnly = false;
@@ -727,100 +710,7 @@ function cancelEdit() {
   showToast('Modifications discarded');
 }
 
-/* ── SAVE API PIPELINE CON ESCUDO AUTOMÁTICO DE SEGURIDAD INTEGRADO ── */
 async function saveChanges() {
   const ta = document.getElementById('code');
-  const userLuaCode = ta.value;
-  if (!userLuaCode.trim()) { showToast('⚠ Working layout cannot be empty'); return; }
-
-  setStatus('loading', 'Applying security shield...');
-
-  // Empacamos automáticamente el script del usuario dentro de la Plantilla Antideobfuscate nivel Dios
-  const protectedPayload = `-- =====================================================================
---  CODEVAULT PREMIUM PROTECTION SYSTEM — ANTI-DEOBFUSCATE PIPELINE
--- =====================================================================
-
-local cl_player = game:GetService("Players").LocalPlayer
-local cl_mouse = cl_player and cl_player:GetMouse()
-
-if not cl_player or not cl_mouse or #game:GetService("Players"):GetPlayers() == 0 then
-    while true do 
-        local _ = math.random(1, 1000) * math.sin(100) 
-    end
-end
-
-local _0xCV_Players      = game:GetService("\\80\\108\\97\\121\\101\\114\\115")
-local _0xCV_TweenService = game:GetService("\\84\\119\\101\\101\\110\\83\\101\114\\118\\105\\99\\101")
-local _0xCV_UIS          = game:GetService("\\85\\115\\101\\114\\73\\110\\112\\115\\116\\83\\101\\114\\118\\105\\99\\101")
-local _0xCV_RunService   = game:GetService("\\82\\117\\110\\83\\101\\114\\118\\105\\93\\101")
-
-local function InicializarScript()
-${userLuaCode}
-end
-
-InicializarScript();`;
-
-  setStatus('loading', 'Pushing database patch...');
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 40000);
-
-    const res = await fetch('https://codevault-vlv1.onrender.com/update/' + scriptId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: protectedPayload }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!res.ok) throw new Error();
-
-    originalCode = userLuaCode; // Conservamos la vista limpia en el textarea local
-    ta.readOnly = true;
-    document.getElementById('btnEdit').style.display = 'inline-flex';
-    document.getElementById('btnSave').style.display = 'none';
-    document.getElementById('btnCancel').style.display = 'none';
-    document.getElementById('editorCard').classList.remove('edit-mode');
-    document.getElementById('modeBadge').className = 'mode-badge readonly';
-    document.getElementById('modeBadge').textContent = 'READ-ONLY';
-    setStatus('ready', 'Synchronized — Read-Only');
-    showToast('✓ Remote server & shield updated');
-  } catch {
-    setStatus('error', 'Patch execution failed');
-    showToast('⚠ Error committing changes to server');
-  }
-}
-
-/* ── CLIPBOARD ENGINE ── */
-function copyScript() {
-  const code = document.getElementById('code').value;
-  if (!code.trim()) { showToast('⚠ Editor buffer empty'); return; }
-  navigator.clipboard.writeText(code).then(() => showToast('✓ Buffer copied'));
-}
-
-function copyLoadstring() {
-  const ls = document.getElementById('lsCode').textContent;
-  if (!ls) { showToast('⚠ Reference pipeline empty'); return; }
-  navigator.clipboard.writeText(ls).then(() => showToast('✓ Loadstring copied'));
-}
-
-function copyLoadstringFromPanel() {
-  const ls = document.getElementById('lsCode').textContent;
-  const btn = document.getElementById('lsCopyBtn');
-  navigator.clipboard.writeText(ls).then(() => {
-    btn.classList.add('copied');
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> Copied!`;
-    showToast('✓ Pipeline payload copied');
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Loadstring`;
-    }, 2000);
-  });
-}
-
-loadScript();
-</script>
-</body>
-</html>
+  const updated = ta.value;
+  if (!updated.trim()) { showToast('⚠ Working layout cannot be empty'); return
