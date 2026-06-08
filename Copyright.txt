@@ -1,0 +1,20 @@
+© CodeVoult — Copyright & Usage Notice
+
+Welcome to CodeVoult.
+
+All source code, scripts, web designs, user interfaces, systems, tools, resources, graphics, branding elements, concepts, and custom developments published on this website are the intellectual property of CodeVoult and their respective creators, unless otherwise stated.
+The content available on this platform is provided for authorized use only. Any attempt to copy, redistribute, resell, leak, reupload, modify and republish, claim ownership of, or otherwise exploit CodeVoult content without explicit permission is strictly discouraged.
+CodeVoult respects creativity and innovation. Inspiration is welcome; direct replication is not. If you wish to create a project based on ideas found here, you are encouraged to develop your own implementation and introduce substantial modifications that clearly differentiate your work from the original. Reproducing code structures, systems, designs, layouts, obfuscation methods, security mechanisms, branding, or proprietary features with minimal changes may be considered unauthorized copying.
+By accessing this website and its resources, you acknowledge that:
+• CodeVoult retains ownership of all original content published on this platform.
+• Users may not remove author credits, copyright notices, watermarks, or ownership references.
+• Unauthorized redistribution of CodeVoult resources may result in takedown requests, reports to hosting providers, repository complaints, platform abuse reports, or other actions intended to protect the integrity of the project.
+• Any forks, copies, or derivative works should contain significant original contributions and must not falsely imply affiliation with CodeVoult.
+CodeVoult continuously invests time, effort, creativity, and resources into the development of its projects. Respecting the work of creators helps maintain a healthy and innovative community for everyone.
+This notice serves as a public declaration of ownership and authorship regarding the original works published by CodeVoult.
+Thank you for respecting the creators, contributors, and projects that make this platform possible.
+© CodeVoult. All Rights Reserved.
+Created with passion, protected by authorship.
+
+
+Created by Zyrox Developer - CodeVoult 
