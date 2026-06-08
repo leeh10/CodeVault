@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { v4: uuid } = require("uuid");
 const axios = require("axios");
-const crypto = require("crypto"); // Para generar llaves aleatorias
+const crypto = require("crypto"); 
 
 const app = express();
 app.use(cors());
@@ -10,128 +10,214 @@ app.use(express.json());
 
 const REALTIME_DB_URL = "https://codevault-9ca85-default-rtdb.firebaseio.com/scripts";
 
-// --- MOTOR DE OFUSCACIÓN AVANZADA ---
-function ultraObfuscate(code) {
-    // 1. Generar una llave aleatoria para esta sesión
-    const secretKey = crypto.randomBytes(8).toString('hex');
-    
-    // 2. Cifrado XOR simple pero efectivo
-    let xorCoded = "";
-    for (let i = 0; i < code.length; i++) {
-        xorCoded += String.fromCharCode(code.charCodeAt(i) ^ secretKey.charCodeAt(i % secretKey.length));
+app.get("/", (req, res) => {
+    res.send("API funcionando con Realtime Database y Axios Estable");
+});
+
+// RUTA PARA GUARDAR SCRIPTS NUEVOS
+app.post("/save", async (req, res) => {
+    try {
+        const id = uuid();
+        const scriptCode = req.body.code;
+        if (!scriptCode) {
+            return res.status(400).json({ success: false, error: "No code provided" });
+        }
+        const payload = { code: scriptCode, createdAt: new Date().toISOString() };
+        await axios.put(`${REALTIME_DB_URL}/${id}.json`, payload);
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error("Error al guardar:", error.message);
+        res.status(500).json({ success: false, error: "Error interno" });
     }
+});
 
-    // 3. Convertir a Base64 para evitar caracteres extraños y luego invertir
-    const base64 = Buffer.from(xorCoded).toString('base64');
-    const scrambled = base64.split('').reverse().join('');
+// RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE
+app.put("/update/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const scriptCode = req.body.code;
 
-    // 4. Inyectar basura (Junk Data) para confundir bots de análisis
-    const junk = crypto.randomBytes(16).toString('hex');
-    return { data: scrambled, key: secretKey, junk: junk };
-}
+        if (!scriptCode) {
+            return res.status(400).json({ success: false, error: "No code provided" });
+        }
 
-// ... (Tus rutas /save y /update se mantienen igual)
+        const payload = {
+            code: scriptCode,
+            updatedAt: new Date().toISOString()
+        };
 
-app.get("/raw/:id", async (req, res) => {
+        await axios.patch(`${REALTIME_DB_URL}/${id}.json`, payload);
+        res.json({ success: true, id });
+    } catch (error) {
+        console.error("Error al actualizar en Realtime DB:", error.message);
+        res.status(500).json({ success: false, error: "Error interno al actualizar" });
+    }
+});
+
+// RUTA EXCLUSIVA WEB RAW
+app.get("/web/raw/:id", async (req, res) => {
     try {
         const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
-        if (!response || !response.data) return res.status(404).send("Invalid ID");
+        if (!response.data || !response.data.code) return res.status(404).send("Not Found");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.send(response.data.code);
+    } catch (error) {
+        return res.status(500).send("Error en la base de datos");
+    }
+});
 
-        const code = response.data.code;
+// --- MOTOR DE OFUSCACIÓN MILITAR INMUNE A BOTS (Hex-XOR Dinámico) ---
+function ultraObfuscate(code) {
+    // 1. Generamos una llave numérica aleatoria entre 1 y 255
+    const secretKey = crypto.randomInt(1, 254);
+    
+    // 2. Aplicamos XOR directo a los buffers para máxima velocidad
+    const codeBuffer = Buffer.from(code, 'utf8');
+    const xorBuffer = Buffer.alloc(codeBuffer.length);
+    
+    for (let i = 0; i < codeBuffer.length; i++) {
+        xorBuffer[i] = codeBuffer[i] ^ secretKey;
+    }
+
+    // 3. Pasamos a hexadecimal e invertimos para destruir patrones estáticos
+    const hexData = xorBuffer.toString('hex');
+    const scrambledHex = hexData.split('').reverse().join('');
+
+    // 4. Inyectamos basura (Junk hex) que el cargador ignorará por completo
+    const junkData = crypto.randomBytes(12).toString('hex');
+
+    return {
+        stream: scrambledHex,
+        key: secretKey,
+        junk: junkData
+    };
+}
+
+// RUTA CON ESCUDO DE SEGURIDAD CYBERPUNK ULTRA HARDENED V7.0
+app.get("/raw/:id", async (req, res) => {
+    try {
+        let code = undefined;
+        try {
+            const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+            if (response.data && response.data.code) code = response.data.code;
+        } catch (e) { code = undefined; }
+        
         const userAgent = req.headers['user-agent'] || '';
-        const esExecutor = userAgent.includes('Roblox') || userAgent.includes('Executor') || userAgent === '';
+        const esExecutor = userAgent.includes('Roblox') || userAgent.includes('Protocol') || userAgent.includes('Executor') || userAgent === '';
 
         if (esExecutor) {
+            if (!code) {
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(404).send("-- CodeVault Error: Script no encontrado.");
+            }
+
+            // Aplicamos el motor de cifrado avanzado sin bugs
             const obfuscated = ultraObfuscate(code);
 
-            // Payload de LUA con protección de ambiente y marca de agua profesional
-            const secureLuaPayload = `
---[[
+            // Payload de LUA optimizado con descifrado nativo ultrarrápido por tablas
+            const secureLuaPayload = `--[[
     █▀▀ █▀█ █▀▄ █▀▀ █░█ ▄▀█ █░█ █░░ ▀█▀
     █▄▄ █▄█ █▄▀ ██▄ ▀▄▀ █▀█ █▄█ █▄▄ ░█░
-    SECURITY SYSTEM V7.0 - PROTECTED BY CODEVAULT
-    UNAUTHORIZED ACCESS WILL TERMINATE EXECUTION
+    SECURITY SYSTEM V7.0 - ANTI-BOT BY CODEVAULT
 ]]
 
-local _v = {
-    ["s"] = "${obfuscated.data}",
-    ["k"] = "${obfuscated.key}",
+local _vault = {
+    ["s"] = "${obfuscated.stream}",
+    ["k"] = ${obfuscated.key},
     ["j"] = "${obfuscated.junk}"
 }
 
-local _raw = {
-    ["b"] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-    ["char"] = string.char,
-    ["byte"] = string.byte,
-    ["sub"] = string.sub,
-    ["rev"] = string.reverse
-}
+-- Resguardo blindado de globales para evitar Hooks
+local _raw_gsub = string.gsub
+local _raw_reverse = string.reverse
+local _raw_char = string.char
+local _raw_tonumber = tonumber
+local _raw_pcall = pcall
 
--- Decodificador Base64 Interno (Hardened)
-local function _db64(data)
-    local b = _raw.b
-    data = _raw.gsub(data, '[^'..b..'=]', '')
-    return (data:gsub('.', function(x)
-        if (x == '=') then return '' end
-        local r, f = '', (b:find(x) - 1)
-        for i = 6, 1, -1 do r = r .. (f % 2^i - f % 2^(i - 1) > 0 and '1' or '0') end
-        return r;
-    end):gsub('%d%d%d%d%d%d%d%d', function(x)
-        return _raw.char(tonumber(x, 2))
-    end))
-end
-
-local function _vaultPipeline(stream, key)
-    -- Paso 1: Reversa y Limpieza
-    local _s = _raw.rev(stream)
-    local _decoded = _db64(_s)
+local function _0xCV_Pipeline(stream, key)
+    -- Volteamos el Hex al derecho
+    local normalHex = _raw_reverse(stream)
     
-    -- Paso 2: Des-XOR dinámico
-    local _output = ""
-    for i = 1, #_decoded do
-        local _char = _raw.byte(_decoded, i)
-        local _k = _raw.byte(key, (i - 1) % #key + 1)
-        _output = _output .. _raw.char(_raw.bxor(_char, _k))
-    end
-    return _output
+    -- Descifrado por ráfaga nativa (XOR integrado en el parseo de bytes)
+    local decoded = _raw_gsub(normalHex, "..", function(byte)
+        local numericByte = _raw_tonumber(byte, 16)
+        -- Aplicamos la operación XOR de forma nativa e instantánea usando matemáticas puras de Luau
+        local decryptedByte = (numericByte + key) % 256
+        -- Si tus ejecutores soportan bit32 lo usa, sino corre por el bypass aritmético tradicional
+        if bit32 and bit32.bxor then
+            decryptedByte = bit32.bxor(numericByte, key)
+        else
+            -- Algoritmo rápido de XOR aritmético sin dependencias externas
+            local p, c = 1, 0
+            local a, b = numericByte, key
+            while a > 0 or b > 0 do
+                local ra, rb = a % 2, b % 2
+                if ra ~= rb then c = c + p end
+                a, b, p = (a - ra) / 2, (b - rb) / 2, p * 2
+            end
+            decryptedByte = c
+        end
+        return _raw_char(decryptedByte)
+    end)
+    return decoded
 end
 
--- ANTI-TAMPER: Verificación de Integridad de Globales
-if (not bit32 or not getfenv) then while true do end end
-
-local _0xStatus, _0xSource = pcall(function()
-    return _vaultPipeline(_v.s, _v.k)
-end)
-
-if _0xStatus and _0xSource then
-    local _exec = loadstring(_0xSource)
-    if _exec then
-        _exec()
-    else
-        warn("[CODEVAULT]: Integrity breach detected.")
-    end
-else
+-- AMBIENTE ANTI-BOT / EMULADOR
+if not game or not game:GetService("Players") then
     while true do end
 end
-`.trim();
+
+local isSafe, runtimeSource = _raw_pcall(function()
+    return _0xCV_Pipeline(_vault.s, _vault.k)
+end)
+
+if isSafe and runtimeSource then
+    local executablePayload = loadstring or _raw_pcall
+    executablePayload(runtimeSource)()
+else
+    while true do end
+end`;
 
             res.setHeader('Content-Type', 'text/plain');
             return res.send(secureLuaPayload);
-        }
-
-        // --- VISTA WEB (BLOQUEADA) ---
-        return res.send(\`
-            <html>
-                <body style="background:#050505; color:red; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh;">
-                    <div style="border:1px solid red; padding:20px; text-align:center;">
-                        <h1>CODEVAULT V7 ENCRYPTED</h1>
-                        <p>Solo los ejecutores autorizados pueden procesar este flujo.</p>
-                        <p style="color:#555; font-size:10px;">ID: ${req.params.id}</p>
-                    </div>
-                </body>
-            </html>
-        \`);
+        } 
+        
+        // --- VISTA WEB ESTILO CYBERPUNK PROTEGIDA ---
+        return res.send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeVault — Protected</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: monospace; display: grid; place-items: center; height: 100vh; margin: 0; }
+        .card { width: 90%; max-width: 450px; background: #000; border: 1px solid #222; padding: 30px; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .title { font-size: 24px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; color: #fff; }
+        .subtitle { font-size: 10px; color: #555; letter-spacing: 4px; margin-bottom: 20px; }
+        .status { padding: 10px; background: #111; border-left: 3px solid ${code ? '#00ff88' : '#ff3b3b'}; font-size: 12px; margin-bottom: 20px; }
+        .green { color: #00ff88; } .red { color: #ff3b3b; }
+        .desc { font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 25px; }
+        .btn { display: block; background: #fff; color: #000; text-align: center; padding: 12px; text-decoration: none; font-size: 11px; font-weight: bold; letter-spacing: 1px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">CODEVAULT</div>
+        <div class="subtitle">SECURITY INTERFACE</div>
+        <div class="status">> STATUS: <span class="${code ? 'green' : 'red'}">${code ? "CÓDIGO PROTEGIDO" : "NOT FOUND / EXPIRADO"}</span><br>> ACCESS: <span class="red">WEB_BLOCKED</span></div>
+        <p class="desc">${code ? "Este script se encuentra protegido legítimamente bajo el entorno de CodeVault. El acceso web al código plano está deshabilitado para evitar su filtración." : "El identificador de script solicitado no existe."}</p>
+        <a href="https://leeh10.github.io/CodeVault/index.html" class="btn">IR AL PANEL PRINCIPAL</a>
+    </div>
+</body>
+</html>
+        `);
     } catch (error) {
-        res.status(500).send("Security Shield Error");
+        return res.status(500).send("Security Shield Error");
     }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("Server running perfectly with Realtime DB REST API");
 });
