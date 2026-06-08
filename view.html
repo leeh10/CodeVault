@@ -640,6 +640,7 @@ function updateLineCount(val) {
 }
 
 /* ── DATA FETCH ── */
+/* ── DATA FETCH OPTIMIZADO CON AUTO-REINTENTO ── */
 async function loadScript() {
   scriptId = getId();
   
@@ -652,29 +653,50 @@ async function loadScript() {
 
   document.getElementById('scriptIdLabel').textContent = `#${scriptId.toUpperCase()}`;
 
-  // El ejecutor sigue usando el /raw/ normal para que le sirva la seguridad
   const rawUrlForExecutor = 'https://codevault-vlv1.onrender.com/raw/' + scriptId;
   const ls = 'loadstring(game:HttpGet("' + rawUrlForExecutor + '"))()';
 
   document.getElementById('lsCode').textContent = ls;
   document.getElementById('lsSection').style.display = 'block';
 
-  try {
-    // CAMBIO AQUÍ: Agregamos '/web' antes de '/raw/' para saltarnos la pasarela visual en tu app
-    const res = await fetch('https://codevault-vlv1.onrender.com/web/raw/' + scriptId);
-    if (!res.ok) throw new Error();
-    const code = await res.text();
-    
-    document.getElementById('code').value = code;
-    originalCode = code;
-    updateLineCount(code);
-    setStatus('ready', 'Synchronized — Read-Only');
-    showToast('✓ Pipeline sync successful');
-  } catch {
-    setStatus('error', 'Server handshake failed');
-    showToast('⚠ Fetch aborted: Check Render instance');
+  // Intentamos cargar el script con soporte para servidores dormidos
+  let intentos = 0;
+  const maxIntentos = 3;
+
+  async function intentarFetch() {
+    try {
+      // Configuramos un controlador para darle un tiempo de espera más largo (40 segundos) por si Render está despertando
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 40000);
+
+      setStatus('loading', intentos > 0 ? `Waking up server (Attempt ${intentos + 1})...` : 'Synchronizing pipeline...');
+
+      const res = await fetch('https://codevault-vlv1.onrender.com/web/raw/' + scriptId, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error();
+      const code = await res.text();
+      
+      document.getElementById('code').value = code;
+      originalCode = code;
+      updateLineCount(code);
+      setStatus('ready', 'Synchronized — Read-Only');
+      showToast('✓ Pipeline sync successful');
+    } catch (err) {
+      intentos++;
+      if (intentos < maxIntentos) {
+        setStatus('loading', `Server cold boot detected. Retrying in 3s...`);
+        setTimeout(intentarFetch, 3000); // Espera 3 segundos antes de volver a intentar
+      } else {
+        setStatus('error', 'Server handshake failed');
+        showToast('⚠ Fetch aborted: Render instance sleeping');
+      }
+    }
   }
+
+  intentarFetch();
 }
+
 
 
 document.getElementById('code').addEventListener('input', function() {
@@ -710,7 +732,7 @@ function cancelEdit() {
   showToast('Modifications discarded');
 }
 
-/* ── SAVE API PIPELINE ── */
+/* ── SAVE API PIPELINE CON TIEMPO DE ESPERA EXTENDIDO ── */
 async function saveChanges() {
   const ta = document.getElementById('code');
   const updated = ta.value;
@@ -719,11 +741,17 @@ async function saveChanges() {
   setStatus('loading', 'Pushing database patch...');
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 40000); // 40 segundos de tolerancia
+
     const res = await fetch('https://codevault-vlv1.onrender.com/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: scriptId, code: updated })
+      body: JSON.stringify({ id: scriptId, code: updated }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) throw new Error();
 
