@@ -1,4 +1,4 @@
-const express = require("express");
+Const express = require("express");
 const cors = require("cors");
 const { v4: uuid } = require("uuid");
 const axios = require("axios");
@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
     res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
-// 1. RUTA PARA GUARDAR SCRIPTS NUEVOS (AUTOMÁTICA)
+// RUTA PARA GUARDAR SCRIPTS NUEVOS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -30,7 +30,7 @@ app.post("/save", async (req, res) => {
     }
 });
 
-// 2. RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE SIN CAMBIAR EL ID
+// RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE SIN CAMBIAR EL ID
 app.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -45,7 +45,9 @@ app.put("/update/:id", async (req, res) => {
             updatedAt: new Date().toISOString()
         };
 
+        // Hacemos un PATCH para sobreescribir solo el código y la fecha sin romper la seguridad
         await axios.patch(`${REALTIME_DB_URL}/${id}.json`, payload);
+
         res.json({ success: true, id });
     } catch (error) {
         console.error("Error al actualizar en Realtime DB:", error.message);
@@ -53,7 +55,7 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
-// 3. RUTA EXCLUSIVA WEB RAW (Muestra el código limpio solo a tu panel web)
+// RUTA EXCLUSIVA WEB RAW
 app.get("/web/raw/:id", async (req, res) => {
     try {
         const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
@@ -65,81 +67,31 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// 4. RUTA PARA EL EJECUTOR: ENCRIPTA EN TIEMPO DE EJECUCIÓN (100% COMPATIBLE Y RÁPIDO)
-// Tus usuarios ejecutan esto en Roblox: loadstring(game:HttpGet("https://codevault-vlv1.onrender.com/load/" .. id))()
-app.get("/load/:id", async (req, res) => {
+// RUTA CON ESCUDO DE SEGURIDAD CYBERPUNK
+app.get("/raw/:id", async (req, res) => {
     try {
-        const { id } = req.params;
-        const response = await axios.get(`${REALTIME_DB_URL}/${id}.json`);
-        
-        if (!response.data || !response.data.code) {
-            res.setHeader('Content-Type', 'text/plain');
-            return res.status(404).send("-- CodeVault Error: Script no encontrado.");
-        }
-
-        const cleanCode = response.data.code;
-
-        // ── MOTOR DE OFUSCACIÓN HEXADECIMAL INVERSA ──
-        // Pasamos el script a Hexadecimal estándar
-        const hexString = Buffer.from(cleanCode, 'utf8').toString('hex');
-        // Invertimos la cadena por completo para romper deofuscadores automáticos
-        const reverseHex = hexString.split('').reverse().join('');
-
-        // Empaquetamos la estructura en un formato ultra-ligero que Luau lee de forma nativa
-        const secureLuaPayload = `-- [[ CODEVAULT PREMIUM SHIELD v5.5 ]]
--- SYSTEM ANTI-STATIC ANALYSIS ACTIVE --
-
-local _0xStreamContainer = "${reverseHex}"
-
-local function _0xCV_Pipeline(stream)
-    -- Revertimos el stream inverso directo en memoria
-    local normalHex = string.reverse(stream)
-    -- Traducimos de Hex a caracteres planos de forma nativa e instantánea
-    local decoded = string.gsub(normalHex, "..", function(byte)
-        return string.char(tonumber(byte, 16))
-    end)
-    return decoded
-end
-
-if not game or not game:GetService("Players").LocalPlayer then 
-    while true do end 
-end
-
-local success, runtimeScript = pcall(function()
-    return _0xCV_Pipeline(_0xStreamContainer)
-end)
-
-if success and runtimeScript then
-    local run = loadstring or pcall
-    run(runtimeScript)()
-else
-    while true do end
-end`;
-
-        res.setHeader('Content-Type', 'text/plain');
-        return res.send(secureLuaPayload);
-
-    } catch (error) {
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(500).send("-- CodeVault Error: Excepción en el escudo criptográfico.");
-    }
-});
-
-// 5. RUTA DE INTERFAZ WEB CYBERPUNK (BLOQUEO TOTAL PARA CURIOSOS)
-// URL de muestra: https://codevault-vlv1.onrender.com/view/ID_DEL_SCRIPT
-app.get("/view/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        let exists = false;
+        let code = undefined;
         try {
-            const response = await axios.get(`${REALTIME_DB_URL}/${id}.json`);
-            if (response.data && response.data.code) exists = true;
-        } catch (e) { exists = false; }
+            const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+            if (response.data && response.data.code) code = response.data.code;
+        } catch (e) { code = undefined; }
         
-        const statusText = exists ? "CÓDIGO PROTEGIDO" : "NOT FOUND / EXPIRADO";
-        const statusClass = exists ? "green" : "red";
-        const descText = exists 
-            ? "Este script se encuentra protegido legítimamente bajo el entorno de CodeVault. El acceso visual al código plano está deshabilitado para evitar la filtración de fuentes."
+        const userAgent = req.headers['user-agent'] || '';
+        const esExecutor = userAgent.includes('Roblox') || userAgent.includes('Protocol') || userAgent.includes('Executor') || userAgent === '';
+
+        if (esExecutor) {
+            if (!code) {
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(404).send("-- CodeVault Error: Script no encontrado.");
+            }
+            res.setHeader('Content-Type', 'text/plain');
+            return res.send(code);
+        } 
+        
+        const statusText = code ? "CÓDIGO PROTEGIDO" : "NOT FOUND / EXPIRADO";
+        const statusClass = code ? "green" : "red";
+        const descText = code 
+            ? "Este script se encuentra protegido legítimamente bajo el entorno de CodeVault. El acceso web al código plano está deshabilitado para evitar su filtración."
             : "El identificador de script solicitado no existe en la base de datos de Firebase. Verifica el ID o genera un nuevo enlace.";
 
         return res.send(`
@@ -154,7 +106,7 @@ app.get("/view/:id", async (req, res) => {
         .card { width: 90%; max-width: 450px; background: #000; border: 1px solid #222; padding: 30px; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .title { font-size: 24px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; color: #fff; }
         .subtitle { font-size: 10px; color: #555; letter-spacing: 4px; margin-bottom: 20px; }
-        .status { padding: 10px; background: #111; border-left: 3px solid ${exists ? '#00ff88' : '#ff3b3b'}; font-size: 12px; margin-bottom: 20px; }
+        .status { padding: 10px; background: #111; border-left: 3px solid ${code ? '#00ff88' : '#ff3b3b'}; font-size: 12px; margin-bottom: 20px; }
         .green { color: #00ff88; } .red { color: #ff3b3b; }
         .desc { font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 25px; }
         .btn { display: block; background: #fff; color: #000; text-align: center; padding: 12px; text-decoration: none; font-size: 11px; font-weight: bold; letter-spacing: 1px; border-radius: 2px; }
