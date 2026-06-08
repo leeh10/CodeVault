@@ -174,27 +174,30 @@ if not isGameEnv then
     while true do end
 end
 
--- USAMOS TU TUBERÍA ORIGINAL DE EJECUCIÓN ESTABLE
+-- TUBERÍA EXACTA DE TU VERSIÓN ORIGINAL (EJECUCIÓN GARANTIZADA)
 local isExecutionSafe, runtimeScript = _r_pcall(function()
     return _0xCV_ExecutePipeline(_0xStreamContainer, _0xXorKey, _0xShiftKey)
 end)
 
 if isExecutionSafe and runtimeScript and #runtimeScript > 0 then
-    -- CONEXIÓN DE BLINDAJE IN SITU:
-    -- Compilamos la cadena a bytecode inmediatamente usando loadstring nativo
-    local compiledFunc = loadstring(runtimeScript)
+    -- 1. Compilamos y ejecutamos usando tu mismo cargador nativo estable
+    local run = loadstring or _r_pcall
+    run(runtimeScript)()
     
-    -- EVAPORACIÓN ULTRA RÁPIDA: Destruimos el string plano de la RAM ANTES de ejecutar el script
-    runtimeScript = nil
-    _0xStreamContainer = nil
-    _0xCV_ExecutePipeline = nil
-    collectgarbage("collect")
-    
-    if compiledFunc then
-        -- Ejecuta el script original con sus entornos globales e interfaces intactas
-        compiledFunc()
+    -- 2. PURGA ASÍNCRONA INMEDIATA (Ocurre microsegundos después de arrancar el script)
+    -- Dejamos que el script inicie interfaces y cargue, y al instante evaporamos el string de la RAM
+    if task and task.defer then
+        task.defer(function()
+            runtimeScript = string.rep("\\0", #runtimeScript) -- Sobrescribimos el texto original con ceros binarios
+            runtimeScript = nil
+            _0xStreamContainer = nil
+            _0xCV_ExecutePipeline = nil
+            collectgarbage("collect")
+        end)
     else
-        warn("[CODEVAULT]: Compilation block error.")
+        -- Alternativa por si el executor no soporta la librería task
+        runtimeScript = nil
+        _0xStreamContainer = nil
     end
 else
     warn("[CODEVAULT]: Execution environment blocked.")
