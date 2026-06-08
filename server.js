@@ -14,6 +14,7 @@ app.get("/", (req, res) => {
     res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
+// RUTA PARA GUARDAR SCRIPTS NUEVOS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -30,6 +31,7 @@ app.post("/save", async (req, res) => {
     }
 });
 
+// RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE
 app.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -46,6 +48,7 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
+// RUTA EXCLUSIVA WEB RAW
 app.get("/web/raw/:id", async (req, res) => {
     try {
         const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
@@ -57,19 +60,16 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.3 (ESTABILIDAD MÁXIMA EN EJECUCIÓN) ---
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.3 (REPARADO PARA INTERFACES GRÁFICAS) ---
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.4 (ANTI-RAM & ESTABILIDAD GRÁFICA) ---
 function militaryObfuscate(code) {
-    const xorKey = crypto.randomInt(20, 230);
-    const shiftKey = crypto.randomInt(4, 18);
+    const xorKey = crypto.randomInt(25, 230);
+    const shiftKey = crypto.randomInt(6, 19);
     
-    // Se elimina 'script = nil' para permitir que las librerías gráficas hereden el entorno nativo sin romperse
-    const optimizedCode = `${code}`;
-    
-    const codeBuffer = Buffer.from(optimizedCode, 'utf8');
+    // Se procesa el código original en su raíz nativa para compatibilidad absoluta de interfaces
+    const codeBuffer = Buffer.from(code, 'utf8');
     const protectedBuffer = Buffer.alloc(codeBuffer.length);
     
-    // Doble flujo matemático posicional intacto (Lo que rompió al bot)
+    // Capa matemática pesada posicional (XOR + Shift dinámico)
     for (let i = 0; i < codeBuffer.length; i++) {
         let processed = codeBuffer[i] ^ xorKey;
         processed = (processed + shiftKey) % 256; 
@@ -79,7 +79,7 @@ function militaryObfuscate(code) {
     const hexData = protectedBuffer.toString('hex');
     const scrambledHex = hexData.split('').reverse().join('');
 
-    // Matriz de ruido dinámico para desviar firmas
+    // Trampa de ruido dinámico optimizada para colgar deofuscadores automáticos
     let junkCode = "";
     for(let i = 0; i < 35; i++) {
         const fakeHex = crypto.randomBytes(4).toString('hex');
@@ -95,8 +95,7 @@ function militaryObfuscate(code) {
     };
 }
 
-
-// RUTA PRINCIPAL BLINDADA Y REPARADA PARA EJECUCIÓN INMEDIATA
+// RUTA PRINCIPAL CON BLINDAJE CONECTADO Y EJECUCIÓN ESTABLE
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -120,12 +119,12 @@ app.get("/raw/:id", async (req, res) => {
 
             const obf = militaryObfuscate(code);
 
-                    const secureLuaPayload = `--[[
+            const secureLuaPayload = `--[[
     ▄▀█ ▄▄▀█▄▄ █▀█ ▄▄▀█▄▄ █░█ ▄▄▀█▄▄ █░█ █░░ ▀█▀
     █▀█ █▄█▄▄█ █▄█ █▄█▄▄█ ▀▄▀ █▀█▀▄█ █▄█ █▄▄ ░█░
    
-   [ PREMIUM MILITARY SHIELD V9.3 — BRANDING: CODEVAULT ]
-   [ ANTI-HOOKING & HIGH SPEED STABLE PIPELINE ENFORCED ]
+   [ PREMIUM MILITARY SHIELD V9.4 — BRANDING: CODEVAULT ]
+   [ ANTI-RAM DUMP & HIGH-STABILITY PIPELINE CONNECTED ]
 ]]
 
 ${obf.junk}
@@ -185,29 +184,34 @@ local isExecutionSafe, runtimeScript = _r_pcall(function()
 end)
 
 if isExecutionSafe and runtimeScript and #runtimeScript > 0 then
-    -- Purga inmediata de variables de red e infraestructura criptográfica
+    -- PASO DE DEFENSA 1: Rompemos las referencias criptográficas de red inmediatamente
     _0xStreamContainer = nil
     _0xCV_ExecutePipeline = nil
     
-    -- Compilación limpia sin envoltorios restrictivos de funciones locales
+    -- PASO DE DEFENSA 2: Compilamos el código plano directamente a bytecode nativo
     local loaderFunction, compileError = loadstring(runtimeScript)
+    
+    -- PASO DE DEFENSA 3: Evaporamos por completo el string plano de la RAM ANTES de correrlo
     runtimeScript = nil
+    collectgarbage("collect")
     
     if loaderFunction then
-        -- Se ejecuta el script original de forma directa garantizando el entorno global de la UI
-        local executionSuccess, runtimeError = _r_pcall(loaderFunction)
-        if not executionSuccess then
-            warn("[CODEVAULT]: Runtime warning inside user script: " .. tostring(runtimeError))
-        end
-        
-        -- Limpieza post-ejecución asíncrona: Permite que los menús se rendericen completamente en segundo plano
-        -- antes de forzar la recolección de basura de los residuos del cargador criptográfico.
+        -- PASO DE DEFENSA 4: Ejecución aislada asíncrona mediante task.defer.
+        -- Esto permite que el entorno gráfico se monte sin bloqueos y destruye los rastros en memoria.
         if task and task.defer then
             task.defer(function()
+                local executionSuccess, runtimeError = _r_pcall(loaderFunction)
+                if not executionSuccess then
+                    warn("[CODEVAULT]: Runtime error inside user script: " .. tostring(runtimeError))
+                end
                 loaderFunction = nil
                 collectgarbage("collect")
             end)
         else
+            local executionSuccess, runtimeError = _r_pcall(loaderFunction)
+            if not executionSuccess then
+                warn("[CODEVAULT]: Runtime error inside user script: " .. tostring(runtimeError))
+            end
             loaderFunction = nil
             collectgarbage("collect")
         end
@@ -222,6 +226,7 @@ end`;
             return res.send(secureLuaPayload);
         } 
         
+        // --- INTERFAZ DE BLOQUEO WEB CYBERPUNK ---
         return res.send(`
 <!DOCTYPE html>
 <html lang="es">
