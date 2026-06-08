@@ -7,14 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Configuración nativa para pegarle directo a la base de datos de Google
-const FIRESTORE_URL = "https://firestore.googleapis.com/v1/projects/codevault-9ca85/databases/(default)/documents/scripts";
+// Tu URL Real de Realtime Database extraída de tu propia consola
+const REALTIME_DB_URL = "https://codevault-9ca85-default-rtdb.firebaseio.com/scripts";
 
 app.get("/", (req, res) => {
-    res.send("API funcionando con Firebase REST nativo");
+    res.send("API funcionando con Realtime Database nativo");
 });
 
-// RUTA PARA GUARDAR
+// RUTA PARA GUARDAR: Guarda el script directo en Realtime Database
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -24,47 +24,44 @@ app.post("/save", async (req, res) => {
             return res.status(400).json({ success: false, error: "No code provided" });
         }
 
-        // Estructura oficial que pide la API de Google Firestore
         const payload = {
-            fields: {
-                code: { stringValue: scriptCode },
-                createdAt: { stringValue: new Date().toISOString() }
-            }
+            code: scriptCode,
+            createdAt: new Date().toISOString()
         };
 
-        // Guardamos directamente con un PUT usando el ID único
-        const response = await fetch(`${FIRESTORE_URL}/${id}`, {
-            method: "PATCH", // PATCH crea o sobreescribe el documento en Firestore
+        // En Realtime Database se guarda con un PUT apuntando al ID.json
+        const response = await fetch(`${REALTIME_DB_URL}/${id}.json`, {
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
             const errText = await response.text();
-            throw new Error(`Google API Error: ${errText}`);
+            throw new Error(`Firebase Error: ${errText}`);
         }
 
         res.json({ success: true, id });
     } catch (error) {
-        console.error("Error al guardar en Firebase REST:", error);
+        console.error("Error al guardar en Realtime DB:", error);
         res.status(500).json({ success: false, error: "Error interno del servidor" });
     }
 });
 
-// RUTA EXCLUSIVA WEB RAW (Para tu view.html)
+// RUTA EXCLUSIVA WEB RAW: Para tu view.html
 app.get("/web/raw/:id", async (req, res) => {
     try {
-        const response = await fetch(`${FIRESTORE_URL}/${req.params.id}`);
+        const response = await fetch(`${REALTIME_DB_URL}/${req.params.id}.json`);
         
         if (!response.ok) {
             return res.status(404).send("Not Found");
         }
 
         const data = await response.json();
-        const code = data.fields.code.stringValue;
+        if (!data) return res.status(404).send("Not Found");
 
         res.setHeader('Content-Type', 'text/plain');
-        return res.send(code);
+        return res.send(data.code);
     } catch (error) {
         return res.status(500).send("Error al consultar la base de datos");
     }
@@ -73,12 +70,14 @@ app.get("/web/raw/:id", async (req, res) => {
 // RUTA CON ESCUDO DE SEGURIDAD CYBERPUNK
 app.get("/raw/:id", async (req, res) => {
     try {
-        const response = await fetch(`${FIRESTORE_URL}/${req.params.id}`);
+        const response = await fetch(`${REALTIME_DB_URL}/${req.params.id}.json`);
         let code = undefined;
 
         if (response.ok) {
             const data = await response.json();
-            code = data.fields && data.fields.code ? data.fields.code.stringValue : undefined;
+            if (data && data.code) {
+                code = data.code;
+            }
         }
         
         const userAgent = req.headers['user-agent'] || '';
@@ -90,7 +89,7 @@ app.get("/raw/:id", async (req, res) => {
         if (esExecutor) {
             if (!code) {
                 res.setHeader('Content-Type', 'text/plain');
-                return res.status(404).send("-- CodeVault Error: Script no encontrado o expirado permanentemente.");
+                return res.status(404).send("-- CodeVault Error: Script no encontrado.");
             }
             res.setHeader('Content-Type', 'text/plain');
             return res.send(code);
@@ -203,5 +202,5 @@ function draw() { ctx.clearRect(0, 0, W, H); for (let i = 0; i < nodes.length; i
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log("Server running with Native Google REST API");
+    console.log("Server running perfectly with Realtime DB REST API");
 });
