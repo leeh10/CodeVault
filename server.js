@@ -1,21 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 const { v4: uuid } = require("uuid");
-const fetch = require("node-fetch"); // Esto salva el arranque en Render con versiones viejas
+const axios = require("axios"); // Sistema ultra-estable para Render
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Tu URL de Realtime Database pública
+// Tu URL oficial de Realtime Database pública
 const REALTIME_DB_URL = "https://codevault-9ca85-default-rtdb.firebaseio.com/scripts";
 
 app.get("/", (req, res) => {
-    res.send("API funcionando con Realtime Database y Fetch Estable");
+    res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
-// RUTA PARA GUARDAR
+// RUTA PARA GUARDAR SCRIPTS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -30,20 +30,12 @@ app.post("/save", async (req, res) => {
             createdAt: new Date().toISOString()
         };
 
-        const response = await fetch(`${REALTIME_DB_URL}/${id}.json`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`Firebase Error: ${errText}`);
-        }
+        // Guardado directo usando el método PUT de Axios hacia Firebase
+        await axios.put(`${REALTIME_DB_URL}/${id}.json`, payload);
 
         res.json({ success: true, id });
     } catch (error) {
-        console.error("Error al guardar en Realtime DB:", error);
+        console.error("Error al guardar en Realtime DB:", error.message);
         res.status(500).json({ success: false, error: "Error interno del servidor" });
     }
 });
@@ -51,14 +43,10 @@ app.post("/save", async (req, res) => {
 // RUTA EXCLUSIVA WEB RAW
 app.get("/web/raw/:id", async (req, res) => {
     try {
-        const response = await fetch(`${REALTIME_DB_URL}/${req.params.id}.json`);
+        const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+        const data = response.data;
         
-        if (!response.ok) {
-            return res.status(404).send("Not Found");
-        }
-
-        const data = await response.json();
-        if (!data) return res.status(404).send("Not Found");
+        if (!data || !data.code) return res.status(404).send("Not Found");
 
         res.setHeader('Content-Type', 'text/plain');
         return res.send(data.code);
@@ -70,14 +58,15 @@ app.get("/web/raw/:id", async (req, res) => {
 // RUTA CON ESCUDO DE SEGURIDAD CYBERPUNK
 app.get("/raw/:id", async (req, res) => {
     try {
-        const response = await fetch(`${REALTIME_DB_URL}/${req.params.id}.json`);
         let code = undefined;
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data && data.code) {
-                code = data.code;
+        
+        try {
+            const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+            if (response.data && response.data.code) {
+                code = response.data.code;
             }
+        } catch (dbErr) {
+            code = undefined;
         }
         
         const userAgent = req.headers['user-agent'] || '';
@@ -174,33 +163,4 @@ app.get("/raw/:id", async (req, res) => {
             <div class="terminal">
                 <div class="t-line"><span class="t-prompt">&gt;</span><span class="t-key">STATUS</span><span class="t-val ${statusClass}">${statusText}</span></div>
                 <div class="t-line"><span class="t-prompt">&gt;</span><span class="t-key">ACCESS</span><span class="t-val danger">WEB_BLOCKED</span></div>
-                <div class="t-line"><span class="t-prompt">&gt;</span><span class="t-key">EXECUTOR</span><span class="t-val ok">AUTHORIZED ✓</span></div>
-            </div>
-            <p class="desc">${descText}</p>
-            <a href="https://leeh10.github.io/CodeVault/index.html" class="cta">¿Quieres subir tus propios scripts? Dale aquí</a>
-        </div>
-        <div class="card-footer">
-            <span class="footer-text">© 2026 CODEVAULT — ALL RIGHTS RESERVED</span>
-            <span class="footer-id">#${req.params.id ? req.params.id.substring(0,8).toUpperCase() : 'UNKNOWN'}</span>
-        </div>
-    </div>
-</div>
-<script>
-const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d'); let W, H, nodes = []; const COUNT = 80; const MAX_DIST = 130;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-class Node { constructor() { this.reset(true); } reset(rand) { this.x = rand ? Math.random() * W : (Math.random() < 0.5 ? 0 : W); this.y = rand ? Math.random() * H : Math.random() * H; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.r = Math.random() * 1.4 + 0.4; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > W) this.vx *= -1; if (this.y < 0 || this.y > H) this.vy *= -1; } }
-resize(); for (let i = 0; i < COUNT; i++) nodes.push(new Node()); window.addEventListener('resize', resize);
-function draw() { ctx.clearRect(0, 0, W, H); for (let i = 0; i < nodes.length; i++) { nodes[i].update(); for (let j = i + 1; j < nodes.length; j++) { const dx = nodes[i].x - nodes[j].x; const dy = nodes[i].y - nodes[j].y; const dist = Math.sqrt(dx * dx + dy * dy); if (dist < MAX_DIST) { ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / MAX_DIST) * 0.14})`; ctx.lineWidth = 0.5; ctx.stroke(); } } } for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill(); } requestAnimationFrame(draw); } draw();
-</script>
-</body>
-</html>
-        `);
-    } catch (error) {
-        return res.status(500).send("Error en el escudo de seguridad");
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log("Server running perfectly with Realtime DB REST API");
-});
+                <div class="t-line"><span class="t-
