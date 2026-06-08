@@ -3,7 +3,6 @@ const cors = require("cors");
 const { v4: uuid } = require("uuid");
 const axios = require("axios");
 const crypto = require("crypto");
-const zlib = require("zlib"); 
 
 const app = express();
 app.use(cors());
@@ -61,34 +60,37 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.0 ---
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.1 ---
 function militaryObfuscate(code) {
-    // 1. Cifrado previo XOR Dinámico con clave aleatoria
-    const secretKey = crypto.randomInt(10, 240);
-    const codeBuffer = Buffer.from(code, 'utf8');
-    const xorBuffer = Buffer.alloc(codeBuffer.length);
+    // 1. Generar dos llaves aleatorias dinámicas para romper patrones estáticos
+    const xorKey = crypto.randomInt(15, 235);
+    const shiftKey = crypto.randomInt(5, 20);
     
+    const codeBuffer = Buffer.from(code, 'utf8');
+    const protectedBuffer = Buffer.alloc(codeBuffer.length);
+    
+    // 2. Doble capa matemática (XOR + Desplazamiento de Byte)
     for (let i = 0; i < codeBuffer.length; i++) {
-        xorBuffer[i] = codeBuffer[i] ^ secretKey;
+        let processed = codeBuffer[i] ^ xorKey;
+        processed = (processed + shiftKey) % 256; 
+        protectedBuffer[i] = processed;
     }
 
-    // 2. Comprimir el flujo XOR para destruir firmas de código plano
-    const compressedBuffer = zlib.deflateRawSync(xorBuffer);
-
-    // 3. Pasar a Hexadecimal e invertir completamente el string
-    const hexData = compressedBuffer.toString('hex');
+    // 3. Pasar a Hexadecimal e invertir completamente el flujo
+    const hexData = protectedBuffer.toString('hex');
     const scrambledHex = hexData.split('').reverse().join('');
 
-    // 4. GENERADOR DE JUNK MATRIZ (Trampa para formateadores automáticos de bots)
+    // 4. GENERADOR DE JUNK MATRIZ (Trampa pesada para colgar decodificadores automáticos de bots)
     let junkCode = "";
-    for(let i = 0; i < 40; i++) {
-        const fakeArray = Array.from({length: 6}, () => `0x${crypto.randomBytes(1).toString('hex')}`).join(', ');
-        junkCode += `local _0xErr_${crypto.randomBytes(3).toString('hex')} = {${fakeArray}}; \n`;
+    for(let i = 0; i < 35; i++) {
+        const fakeHex = crypto.randomBytes(4).toString('hex');
+        junkCode += `local _0xErr_${fakeHex} = function() return "${crypto.randomBytes(8).toString('base64')}" end;\n`;
     }
 
     return {
         stream: scrambledHex,
-        key: secretKey,
+        key1: xorKey,
+        key2: shiftKey,
         junk: junkCode
     };
 }
@@ -117,18 +119,18 @@ app.get("/raw/:id", async (req, res) => {
 
             const obf = militaryObfuscate(code);
 
-            // Generamos la carga segura con la marca oficial de CODEVAULT
+            // Generamos la carga limpia y completamente funcional para Luau
             const secureLuaPayload = `--[[
-    ▄▀█ balance▀█▄▄ █▀█ balance█▀▄ █░█ balance▄▀█ balance█░█ █░░ balance▀█▀
-    █▀█ balance█▄█ balance█▄█ balance█▄▀ ▀▄▀ balance█▀█ balance█▄█ █▄▄ balance░█░
+    ▄▀█ ▄▄▀█▄▄ █▀█ ▄▄▀█▄▄ █░█ ▄▄▀█▄▄ █░█ █░░ ▀█▀
+    █▀█ █▄█▄▄█ █▄█ █▄█▄▄█ ▀▄▀ █▀█▀▄█ █▄█ █▄▄ ░█░
    
-   [ PREMIUM MILITARY SHIELD V9.0 — BRANDING: CODEVAULT V9 ]
+   [ PREMIUM MILITARY SHIELD V9.1 — BRANDING: CODEVAULT ]
    [ SECURITY INTEGRITY SYSTEM ENFORCED BY CODEVAULT INTERNALS ]
 ]]
 
 ${obf.junk}
 
--- Resguardo criptográfico local nativo
+-- Resguardo blindado de funciones nativas locales
 local _r_gsub = string.gsub
 local _r_reverse = string.reverse
 local _r_char = string.char
@@ -137,26 +139,31 @@ local _r_pcall = pcall
 local _r_bxor = (bit32 and bit32.bxor)
 
 local _0xStreamContainer = "${obf.stream}"
-local _0xKeySignature = ${obf.key}
+local _0xXorKey = ${obf.key1}
+local _0xShiftKey = ${obf.key2}
 
-local function _0xCV_ExecutePipeline(stream, key)
-    -- Paso 1: Voltear el string al orden correcto
+local function _0xCV_ExecutePipeline(stream, k1, k2)
+    -- Paso 1: Reversar el flujo hexadecimal para ordenarlo
     local normalHex = _r_reverse(stream)
     
-    -- Paso 2: Reconstrucción veloz por tablas nativas
     local cleanBytes = {}
     local index = 1
     
+    -- Paso 2: Descifrar mediante el iterador nativo capturando el retorno de string.gsub
     _r_gsub(normalHex, "..", function(byte)
         local rawByte = _r_tonumber(byte, 16)
-        local decryptedByte
         
+        -- Deshacer el desplazamiento posicional
+        local unshifted = (rawByte - k2) % 256
+        if unshifted < 0 then unshifted = unshifted + 256 end
+        
+        -- Aplicar des-XOR de alta velocidad
+        local decryptedByte
         if _r_bxor then
-            decryptedByte = _r_bxor(rawByte, key)
+            decryptedByte = _r_bxor(unshifted, k1)
         else
-            -- Algoritmo rápido de XOR aritmético sin dependencias externas
             local p, c = 1, 0
-            local a, b = rawByte, key
+            local a, b = unshifted, k1
             while a > 0 or b > 0 do
                 local ra, rb = a % 2, b % 2
                 if ra ~= rb then c = c + p end
@@ -169,36 +176,26 @@ local function _0xCV_ExecutePipeline(stream, key)
         index = index + 1
     end)
     
-    local rawDecompressed = table.concat(cleanBytes)
-    
-    -- Paso 3: Descompresión nativa mediante entorno de ejecución (Bypass de Lag)
-    local finalSource = rawDecompressed
-    local decompressor = syn and syn.decompress or crypt and (crypt.lz4decompress or crypt.custom_decompress)
-    
-    if decompressor then
-        local successDecompress, result = _r_pcall(decompressor, rawDecompressed)
-        if successDecompress then finalSource = result end
-    end
-    
-    return finalSource
+    -- Retornar el código plano reconstruido
+    return table.concat(cleanBytes)
 end
 
--- FILTRO DE ENTORNO FAKE / BOTS DE DISCORD
-if not game or not game:GetService("Players") then
-    while true do 
-        local _ = math.sin(100) * math.cos(200)
-    end
+-- CONTROL ANTI-BOT ADAPTATIVO (No congela entornos reales)
+local isGameEnv = pcall(function() return game:IsA("DataModel") end)
+if not isGameEnv then
+    while true do end
 end
 
 local isExecutionSafe, runtimeScript = _r_pcall(function()
-    return _0xCV_ExecutePipeline(_0xStreamContainer, _0xKeySignature)
+    return _0xCV_ExecutePipeline(_0xStreamContainer, _0xXorKey, _0xShiftKey)
 end)
 
-if isExecutionSafe and runtimeScript then
+if isExecutionSafe and runtimeScript and #runtimeScript > 0 then
     local run = loadstring or _r_pcall
     run(runtimeScript)()
 else
-    while true do end
+    -- Fallback de seguridad si el entorno está corrupto
+    warn("[CODEVAULT]: Execution environment blocked.")
 end`;
 
             res.setHeader('Content-Type', 'text/plain');
