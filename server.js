@@ -5,17 +5,9 @@ const axios = require("axios");
 const crypto = require("crypto");
 
 const app = express();
-
 app.use(cors());
-
-app.use(express.json({
-    limit: "100mb"
-}));
-
-app.use(express.urlencoded({
-    extended: true,
-    limit: "100mb"
-}));
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 const REALTIME_DB_URL = "https://codevault-9ca85-default-rtdb.firebaseio.com/scripts";
 
@@ -23,7 +15,6 @@ app.get("/", (req, res) => {
     res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
-// RUTA PARA GUARDAR SCRIPTS NUEVOS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
@@ -40,7 +31,6 @@ app.post("/save", async (req, res) => {
     }
 });
 
-// RUTA PARA ACTUALIZAR UN SCRIPT EXISTENTE
 app.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -57,7 +47,6 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
-// RUTA EXCLUSIVA WEB RAW
 app.get("/web/raw/:id", async (req, res) => {
     try {
         const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
@@ -69,7 +58,7 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.1 ---
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V9.6 (MUTACIÓN ESTRUCTURAL COMPLETA) ---
 function militaryObfuscate(code) {
     const xorKey = crypto.randomInt(15, 235);
     const shiftKey = crypto.randomInt(5, 20);
@@ -86,21 +75,45 @@ function militaryObfuscate(code) {
     const hexData = protectedBuffer.toString('hex');
     const scrambledHex = hexData.split('').reverse().join('');
 
+    // Capa de fragmentación para romper patrones estáticos: partimos el string hex en pedazos aleatorios unidos por '..'
+    let dynamicStreamStr = "";
+    let position = 0;
+    while (position < scrambledHex.length) {
+        let chunkSize = crypto.randomInt(5, 15);
+        let chunk = scrambledHex.slice(position, position + chunkSize);
+        dynamicStreamStr += `"${chunk}" .. `;
+        position += chunkSize;
+    }
+    dynamicStreamStr += `""`; // Cerramos la concatenación de Luau
+
+    // Generador de firmas mutables (Cambiamos el nombre de las variables en cada request)
+    const generateVarName = () => `_0xCV_${crypto.randomBytes(4).toString('hex')}`;
+    const vStream = generateVarName();
+    const vXor = generateVarName();
+    const vShift = generateVarName();
+    const vPipeline = generateVarName();
+
     let junkCode = "";
-    for(let i = 0; i < 35; i++) {
+    for(let i = 0; i < 30; i++) {
         const fakeHex = crypto.randomBytes(4).toString('hex');
         junkCode += `local _0xErr_${fakeHex} = function() return "${crypto.randomBytes(8).toString('base64')}" end;\n`;
     }
 
+    // Ofuscación numérica para las llaves: en vez de "local key = 45", enviamos operaciones matemáticas mutables
+    const obfNumber = (num) => {
+        const rand = crypto.randomInt(10, 500);
+        return `(${num + rand} - ${rand})`;
+    };
+
     return {
-        stream: scrambledHex,
-        key1: xorKey,
-        key2: shiftKey,
+        streamDecl: `local ${vStream} = ${dynamicStreamStr}`,
+        xorDecl: `local ${vXor} = ${obfNumber(xorKey)}`,
+        shiftDecl: `local ${vShift} = ${obfNumber(shiftKey)}`,
+        names: { vStream, vXor, vShift, vPipeline },
         junk: junkCode
     };
 }
 
-// RUTA PRINCIPAL CON SISTEMA DE DEFENSAS ACTIVO
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -123,18 +136,25 @@ app.get("/raw/:id", async (req, res) => {
             }
 
             const obf = militaryObfuscate(code);
+            const { vStream, vXor, vShift, vPipeline } = obf.names;
+
+            // Ensamblaje dinámico: El orden de declaración de las variables cambia aleatoriamente para romper las expresiones regulares rígidas
+            const declarations = [obf.streamDecl, obf.xorDecl, obf.shiftDecl];
+            for (let i = declarations.length - 1; i > 0; i--) {
+                const j = crypto.randomInt(0, i + 1);
+                [declarations[i], declarations[j]] = [declarations[j], declarations[i]];
+            }
 
             const secureLuaPayload = `--[[
     ▄▀█ ▄▄▀█▄▄ █▀█ ▄▄▀█▄▄ █░█ ▄▄▀█▄▄ █░█ █░░ ▀█▀
     █▀█ █▄█▄▄█ █▄█ █▄█▄▄█ ▀▄▀ █▀█▀▄█ █▄█ █▄▄ ░█░
    
-   [ PREMIUM MILITARY SHIELD V9.1 — BRANDING: CODEVAULT ]
-   [ SECURITY INTEGRITY SYSTEM ENFORCED BY CODEVAULT INTERNALS ]
+   [ PREMIUM MILITARY SHIELD V9.6 — BRANDING: CODEVAULT ]
+   [ STRUCTURAL MUTATION PIPELINE ACTIVATED — DETONATING BOT SCANNER ]
 ]]
 
 ${obf.junk}
 
--- Resguardo blindado de funciones nativas locales
 local _r_gsub = string.gsub
 local _r_reverse = string.reverse
 local _r_char = string.char
@@ -142,11 +162,11 @@ local _r_tonumber = tonumber
 local _r_pcall = pcall
 local _r_bxor = (bit32 and bit32.bxor)
 
-local _0xStreamContainer = "${obf.stream}"
-local _0xXorKey = ${obf.key1}
-local _0xShiftKey = ${obf.key2}
+${declarations[0]}
+${declarations[1]}
+${declarations[2]}
 
-local function _0xCV_ExecutePipeline(stream, k1, k2)
+local function ${vPipeline}(stream, k1, k2)
     local normalHex = _r_reverse(stream)
     local cleanBytes = {}
     local index = 1
@@ -177,36 +197,27 @@ local function _0xCV_ExecutePipeline(stream, k1, k2)
     return table.concat(cleanBytes)
 end
 
--- CONTROL ANTI-BOT ADAPTATIVO
 local isGameEnv = pcall(function() return game:IsA("DataModel") end)
 if not isGameEnv then
     while true do end
 end
 
--- TUBERÍA EXACTA DE TU VERSIÓN ORIGINAL (EJECUCIÓN GARANTIZADA)
 local isExecutionSafe, runtimeScript = _r_pcall(function()
-    return _0xCV_ExecutePipeline(_0xStreamContainer, _0xXorKey, _0xShiftKey)
+    return ${vPipeline}(${vStream}, ${vXor}, ${vShift})
 end)
 
 if isExecutionSafe and runtimeScript and #runtimeScript > 0 then
-    -- 1. Compilamos y ejecutamos usando tu mismo cargador nativo estable
     local run = loadstring or _r_pcall
     run(runtimeScript)()
     
-    -- 2. PURGA ASÍNCRONA INMEDIATA (Ocurre microsegundos después de arrancar el script)
-    -- Dejamos que el script inicie interfaces y cargue, y al instante evaporamos el string de la RAM
     if task and task.defer then
         task.defer(function()
-            runtimeScript = string.rep("\\0", #runtimeScript) -- Sobrescribimos el texto original con ceros binarios
+            runtimeScript = string.rep("\\0", #runtimeScript)
             runtimeScript = nil
-            _0xStreamContainer = nil
-            _0xCV_ExecutePipeline = nil
             collectgarbage("collect")
         end)
     else
-        -- Alternativa por si el executor no soporta la librería task
         runtimeScript = nil
-        _0xStreamContainer = nil
     end
 else
     warn("[CODEVAULT]: Execution environment blocked.")
@@ -216,7 +227,6 @@ end`;
             return res.send(secureLuaPayload);
         } 
         
-        // --- INTERFAZ DE BLOQUEO WEB CYBERPUNK ---
         return res.send(`
 <!DOCTYPE html>
 <html lang="es">
@@ -252,6 +262,7 @@ end`;
 });
 
 const PORT = process.env.PORT || 3000;
+app.get('/*', (req, res) => { res.redirect('/'); }); // Captura rutas huérfanas
 app.listen(PORT, () => {
     console.log("Server running perfectly with Realtime DB REST API");
 });
