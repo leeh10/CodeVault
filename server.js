@@ -69,10 +69,10 @@ app.get("/web/raw/:id", async (req, res) => {
     }
 });
 
-// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V14 (QUANTUM FEEDBACK PIPELINE) ---
-function quantumObfuscate(code) {
-    const primaryKey = crypto.randomInt(35, 220);
-    const feedbackSeed = crypto.randomInt(13, 89);
+// --- MOTOR DE OFUSCACIÓN MILITAR CODEVAULT V14.2 (ASYMMETRIC INDEXED PIPELINE) ---
+function advancedQuantumObfuscate(code) {
+    const primaryKey = crypto.randomInt(40, 215);
+    const feedbackSeed = crypto.randomInt(15, 85);
     
     const codeBuffer = Buffer.from(code, 'utf8');
     const encodedArray = [];
@@ -85,9 +85,9 @@ function quantumObfuscate(code) {
         lastByte = obfuscated;
     }
 
+    // Dividir el buffer cifrado en bloques asimétricos desordenados
     const tableChunks = [];
     const chunkSize = Math.ceil(encodedArray.length / 4);
-    
     for (let i = 0; i < 4; i++) {
         const start = i * chunkSize;
         const chunk = encodedArray.slice(start, start + chunkSize);
@@ -95,36 +95,36 @@ function quantumObfuscate(code) {
     }
 
     const randomVar = () => `_0xQ_${crypto.randomBytes(4).toString('hex')}`;
-    
     const vStream = randomVar();
     const vKey = randomVar();
     const vSeed = randomVar();
     const vDecrypter = randomVar();
-    const vEnv = randomVar();
     const vTrap = randomVar();
 
+    // Estructuración densa de Honey-Tokens (Datos basura legítimos para confundir análisis heurísticos)
     let decoyData = "";
-    for(let i = 0; i < 10; i++) {
-        const fakeHex = crypto.randomBytes(6).toString('hex');
-        decoyData += `local _0xDecoy_${fakeHex} = {${crypto.randomInt(1, 255)}, ${crypto.randomInt(1, 255)}, ${crypto.randomInt(1, 255)}};\n`;
+    for(let i = 0; i < 12; i++) {
+        const fakeHex = crypto.randomBytes(5).toString('hex');
+        decoyData += `local _0xTrapVal_${fakeHex} = string.char(${crypto.randomInt(65, 90)}, ${crypto.randomInt(97, 122)});\n`;
     }
 
     const formatMath = (num) => {
-        const factor = crypto.randomInt(3, 9);
-        const offset = crypto.randomInt(50, 200);
+        const factor = crypto.randomInt(4, 8);
+        const offset = crypto.randomInt(100, 300);
         return `(((${num} * ${factor}) + ${offset} - ${offset}) / ${factor})`;
     };
 
     return {
+        // Distribución cruzada no lineal de bloques hexadecimales
         blocks: [tableChunks[2], tableChunks[0], tableChunks[3], tableChunks[1]],
         k1: formatMath(primaryKey),
         k2: formatMath(feedbackSeed),
-        vars: { vStream, vKey, vSeed, vDecrypter, vEnv, vTrap },
+        vars: { vStream, vKey, vSeed, vDecrypter, vTrap },
         decoys: decoyData
     };
 }
 
-// RUTA PRINCIPAL CON SISTEMA ABSOLUTE ISOLATION V14 CORREGIDA Y 100% EJECUTABLE
+// RUTA PRINCIPAL CON SISTEMA ABSOLUTE ISOLATION V14.2
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -146,8 +146,8 @@ app.get("/raw/:id", async (req, res) => {
                 return res.status(404).send("-- CodeVault Error: Script no encontrado.");
             }
 
-            const obf = quantumObfuscate(code);
-            const { vStream, vKey, vSeed, vDecrypter, vEnv, vTrap } = obf.vars;
+            const obf = advancedQuantumObfuscate(code);
+            const { vStream, vKey, vSeed, vDecrypter, vTrap } = obf.vars;
 
             const secureLuaPayload = `--[[
    ██████╗ ██████╗ ██████╗ ███████╗██╗   ██╗ █████╗ ██╗   ██╗██╗  ████████╗
@@ -157,8 +157,8 @@ app.get("/raw/:id", async (req, res) => {
   ╚██████╗╚██████╔╝██████╔╝███████╗ ╚████╔╝ ██║  ██║╚██████╔╝███████╗██║   
    ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝   
    
-   [ PREMIUM MILITARY SHIELD V14.0 — BRANDING: CODEVAULT QUANTUM ]
-   [ METATABLE ISOLATION LAYER — CIPHER FEEDBACK PIPELINE ACTIVE ]
+   [ PREMIUM MILITARY SHIELD V14.2 — BRANDING: CODEVAULT QUANTUM ]
+   [ METATABLE ISOLATION LAYER — MULTI-INDEXED ASYMMETRIC STREAM ]
 ]]
 
 ${obf.decoys}
@@ -172,6 +172,7 @@ local _t_concat = table.concat
 local _pcall = pcall
 local _bxor = (bit32 and bit32.bxor)
 
+-- Control estricto de Hooks externos de bajo nivel
 local function ${vTrap}()
     if not game or not game.IsA then return false end
     
@@ -194,6 +195,7 @@ end
 
 if not ${vTrap}() then
     while true do
+        -- Anti-dump: Bucle infinito por cálculo matemático si es interceptado
         local _ = math.sin(1) * math.cos(1)
     end
 end
@@ -203,6 +205,7 @@ local _bB = "${obf.blocks[1]}"
 local _bC = "${obf.blocks[2]}"
 local _bD = "${obf.blocks[3]}"
 
+-- Reensamblado asimétrico en matriz indexada para romper la lectura secuencial del bot
 local ${vStream} = _bB .. _bD .. _bA .. _bC
 local ${vKey} = ${obf.k1}
 local ${vSeed} = ${obf.k2}
@@ -214,8 +217,8 @@ local function ${vDecrypter}(stream, k1, seed)
     
     _s_gsub(stream, "..", function(hexChar)
         local rawByte = _s_tonumber(hexChar, 16)
-        
         local intermediate = rawByte
+        
         if _bxor then
             intermediate = _bxor(intermediate, lastByte)
             intermediate = _bxor(intermediate, k1)
@@ -248,11 +251,13 @@ end)
 if isIntegritySecure and transparentCode and #transparentCode > 0 then
     local engine = loadstring or _g.loadstring
     if engine then
+        -- Ejecución limpia directa en el entorno seguro del cargador
         engine(transparentCode)()
     else
         error("[CODEVAULT]: Vital engine component failure.")
     end
     
+    -- Recolección atómica total e inmediata de la memoria ram de Luau
     transparentCode = nil
     ${vStream} = nil
     
@@ -394,5 +399,5 @@ end`;
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log("Server running perfectly with Realtime DB REST API and V14 Protection");
+    console.log("Server running perfectly with Realtime DB REST API and V14.2 Protection");
 });
