@@ -71,7 +71,6 @@ app.get("/web/raw/:id", async (req, res) => {
 
 // --- MOTOR DE OFUSCACIÓN AVANZADA CODEVAULT V15 (FRAGMENTED STATE PIPELINE) ---
 function v15DynamicObfuscate(code) {
-    // Dividir el código de entrada en múltiples segmentos lógicos antes de cifrar
     const segments = [];
     const size = Math.ceil(code.length / 3);
     for (let i = 0; i < code.length; i += size) {
@@ -82,7 +81,6 @@ function v15DynamicObfuscate(code) {
     const keys = [primaryKey, primaryKey ^ 0xAA, primaryKey ^ 0x55];
     const encryptedChunks = [];
 
-    // Cifrar cada segmento de manera independiente con llaves derivadas
     segments.forEach((seg, idx) => {
         const buf = Buffer.from(seg, 'utf8');
         const chunkData = [];
@@ -116,7 +114,7 @@ function v15DynamicObfuscate(code) {
     };
 }
 
-// RUTA PRINCIPAL CON SISTEMA DE PROTECCIÓN CAPA V15
+// RUTA PRINCIPAL CON SISTEMA DE PROTECCIÓN CAPA V15 (CORREGIDA PARA EJECUCIÓN)
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -141,7 +139,6 @@ app.get("/raw/:id", async (req, res) => {
             const obf = v15DynamicObfuscate(code);
             const { vState, vRunner, vTrap, vData } = obf.vars;
 
-            // Formatear los bloques cifrados asegurando que no falte ninguno para la ejecución completa
             const c0 = obf.chunks[0] || "";
             const c1 = obf.chunks[1] || "";
             const c2 = obf.chunks[2] || "";
@@ -231,7 +228,7 @@ local function ${vRunner}(block)
         return engine(codeStr)
     else
         error("[CODEVAULT]: Execution segment missing.")
-    end
+    }
 end
 
 -- Máquina de estados no lineal para ejecutar el código de forma fragmentada
@@ -242,7 +239,8 @@ while ${vState} <= 3 do
             return ${vRunner}(${vData}[${vState}])
         end)
         
-        if success Ves segmentFunc then
+        -- CORRECCIÓN AQUÍ: Cambiado 'Ves' por 'and' para restaurar la ejecución nativa
+        if success and segmentFunc then
             segmentFunc()
         else
             warn("[CODEVAULT]: Segment integrity verification failed.")
