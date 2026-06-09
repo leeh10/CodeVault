@@ -7,58 +7,49 @@ const crypto = require("crypto");
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ extended: true, limit: "100mb" }));
+
+app.use(express.json({
+    limit: "100mb"
+}));
+
+app.use(express.urlencoded({
+    extended: true,
+    limit: "100mb"
+}));
 
 const REALTIME_DB_URL = "https://codevault-9ca85-default-rtdb.firebaseio.com/scripts";
 
-// Middleware de seguridad avanzada
-app.use((req, res, next) => {
-    const ua = (req.headers['user-agent'] || '').toLowerCase();
-    const suspicious = [
-        'python', 'requests', 'axios', 'node', 'curl', 'wget', 'bot', 'scraper',
-        'deobfuscator', 'luraph', 'synapse', 'krnl', 'fluxus', 'solara'
-    ];
-    
-    if (suspicious.some(term => ua.includes(term))) {
-        return res.status(403).send("Forbidden");
-    }
-    
-    // Rate limiting simple (puedes mejorarlo con express-rate-limit)
-    const ip = req.ip || req.connection.remoteAddress;
-    if (!global.rateLimit) global.rateLimit = {};
-    if (!global.rateLimit[ip]) global.rateLimit[ip] = { count: 0, time: Date.now() };
-    
+const rateLimit = new Map();
+function checkRateLimit(ip) {
     const now = Date.now();
-    if (now - global.rateLimit[ip].time > 60000) {
-        global.rateLimit[ip] = { count: 0, time: now };
+    const window = 60000;
+    const limit = 10;
+    if (!rateLimit.has(ip)) {
+        rateLimit.set(ip, []);
     }
-    
-    global.rateLimit[ip].count++;
-    if (global.rateLimit[ip].count > 15) {
-        return res.status(429).send("Too Many Requests");
+    const timestamps = rateLimit.get(ip).filter(t => now - t < window);
+    if (timestamps.length >= limit) {
+        return false;
     }
-    
-    next();
-});
+    timestamps.push(now);
+    rateLimit.set(ip, timestamps);
+    return true;
+}
 
 app.get("/", (req, res) => {
-    res.send("CodeVault V15.1 - Enhanced Security Active");
+    res.send("API funcionando con Realtime Database y Axios Estable");
 });
 
-// RUTA PARA GUARDAR SCRIPTS
+// RUTA PARA GUARDAR SCRIPTS NUEVOS
 app.post("/save", async (req, res) => {
     try {
         const id = uuid();
         const scriptCode = req.body.code;
-        if (!scriptCode) return res.status(400).json({ success: false, error: "No code provided" });
-        
-        const payload = { 
-            code: scriptCode, 
-            createdAt: new Date().toISOString(),
-            version: "v15.1"
-        };
-        await axios.put(`\( {REALTIME_DB_URL}/ \){id}.json`, payload);
+        if (!scriptCode) {
+            return res.status(400).json({ success: false, error: "No code provided" });
+        }
+        const payload = { code: scriptCode, createdAt: new Date().toISOString() };
+        await axios.put(`${REALTIME_DB_URL}/${id}.json`, payload);
         res.json({ success: true, id });
     } catch (error) {
         console.error("Error al guardar:", error.message);
@@ -66,18 +57,15 @@ app.post("/save", async (req, res) => {
     }
 });
 
-// RUTA PARA ACTUALIZAR
 app.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const scriptCode = req.body.code;
-        if (!scriptCode) return res.status(400).json({ success: false, error: "No code provided" });
-        
-        const payload = { 
-            code: scriptCode, 
-            updatedAt: new Date().toISOString() 
-        };
-        await axios.patch(`\( {REALTIME_DB_URL}/ \){id}.json`, payload);
+        if (!scriptCode) {
+            return res.status(400).json({ success: false, error: "No code provided" });
+        }
+        const payload = { code: scriptCode, updatedAt: new Date().toISOString() };
+        await axios.patch(`${REALTIME_DB_URL}/${id}.json`, payload);
         res.json({ success: true, id });
     } catch (error) {
         console.error("Error al actualizar:", error.message);
@@ -85,271 +73,380 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
-// RAW para web (mínimo)
 app.get("/web/raw/:id", async (req, res) => {
     try {
-        const response = await axios.get(`\( {REALTIME_DB_URL}/ \){req.params.id}.json`);
-        if (!response.data?.code) return res.status(404).send("Not Found");
+        const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+        if (!response.data || !response.data.code) return res.status(404).send("Not Found");
         res.setHeader('Content-Type', 'text/plain');
-        res.send(response.data.code);
+        return res.send(response.data.code);
     } catch (error) {
-        res.status(500).send("Error");
+        return res.status(500).send("Error en la base de datos");
     }
 });
 
-// ==================== MOTOR DE OFUSCACIÓN MEJORADO V15.1 ====================
-function v15AdvancedObfuscate(code) {
+// --- MOTOR DE OFUSCACIâˆšÄN AVANZADA CODEVAULT V15 ORIGINAL (REPARACIâˆšÄN DE FRAGMENTOS) ---
+function v15DynamicObfuscate(code) {
+    // CORRECCIâˆšÄN CRâˆšÄ‡TICA: Dividir por lâˆšâ‰ neas completas para evitar romper palabras clave de Luau
     const lines = code.split(/\r?\n/);
     const totalLines = lines.length;
-    const chunkCount = 4; // Más fragmentos
-    const chunkSize = Math.ceil(totalLines / chunkCount);
+    const chunkSize = Math.ceil(totalLines / 3);
     
-    const segments = [];
-    for (let i = 0; i < chunkCount; i++) {
-        segments.push(lines.slice(i * chunkSize, (i + 1) * chunkSize).join("\n"));
-    }
+    const segments = [
+        lines.slice(0, chunkSize).join("\n"),
+        lines.slice(chunkSize, chunkSize * 2).join("\n"),
+        lines.slice(chunkSize * 2).join("\n")
+    ];
     
-    const primaryKey = crypto.randomInt(80, 220);
-    const keys = [];
-    for (let i = 0; i < chunkCount; i++) {
-        keys.push((primaryKey ^ (0xAA * (i + 1))) & 0xFF);
-    }
-    
+    const primaryKey = crypto.randomInt(50, 200);
+    const keys = [primaryKey, primaryKey ^ 0xAA, primaryKey ^ 0x55];
     const encryptedChunks = [];
-    
+
     segments.forEach((seg, idx) => {
-        const content = seg || "-- Empty";
+        const content = seg || "-- Empty Segment";
         const buf = Buffer.from(content, 'utf8');
         const chunkData = [];
-        let lastByte = idx * 13 + crypto.randomInt(3, 12);
-        
+        let lastByte = idx * 7;
         for (let i = 0; i < buf.length; i++) {
             let enc = buf[i] ^ keys[idx];
-            enc = (enc ^ lastByte ^ (i % 17)) % 256;
+            enc = (enc ^ lastByte) % 256;
             chunkData.push(enc.toString(16).padStart(2, '0'));
             lastByte = enc;
         }
         encryptedChunks.push(chunkData.join(''));
     });
 
-    const randomVar = (prefix = "_0xCV") => `\( {prefix}_ \){crypto.randomBytes(5).toString('hex')}`;
-    
-    const vars = {
-        vState: randomVar(),
-        vRunner: randomVar(),
-        vTrap: randomVar(),
-        vData: randomVar(),
-        vDecrypt: randomVar(),
-        vJunk: randomVar()
-    };
+    const randomVar = () => `_0xV15_${crypto.randomBytes(4).toString('hex')}`;
+    const vState = randomVar();
+    const vRunner = randomVar();
+    const vTrap = randomVar();
+    const vData = randomVar();
 
     let decoyData = "";
-    for (let i = 0; i < 12; i++) {
-        const fakeHex = crypto.randomBytes(6).toString('hex');
-        decoyData += `local _0xJunk_\( {fakeHex} = " \){crypto.randomBytes(8).toString('hex')}";\n`;
-        decoyData += `local _0xNum_\( {fakeHex} = tonumber("0x \){crypto.randomInt(0x1000, 0xFFFF).toString(16)}");\n`;
+    for(let i = 0; i < 8; i++) {
+        const fakeHex = crypto.randomBytes(4).toString('hex');
+        decoyData += `local _0xNoise_${fakeHex} = tonumber("${crypto.randomInt(1000, 9999)}", 16);\n`;
     }
 
     return {
         chunks: encryptedChunks,
         keys: keys,
-        vars: vars,
+        vars: { vState, vRunner, vTrap, vData },
         decoys: decoyData
     };
 }
 
-// RUTA PRINCIPAL PROTEGIDA
+// RUTA PRINCIPAL CON PROTECCIâˆšÄN REAL V15 PROTEGIDA CONTRA DEOFUSCACIâˆšÄN
 app.get("/raw/:id", async (req, res) => {
     try {
-        const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-        
-        // Detección más agresiva
-        const botKeywords = ['python', 'node', 'axios', 'requests', 'curl', 'wget', 'http', 'deobf', 'luraph', 'dump', 'scrape'];
-        if (botKeywords.some(k => userAgent.includes(k))) {
-            return res.status(403).send("-- Security Violation Detected");
+        const clientIp = req.ip || req.connection.remoteAddress;
+        if (!checkRateLimit(clientIp)) {
+            return res.status(429).send("Too many requests.");
         }
 
-        let code = null;
+        const userAgent = req.headers['user-agent'] || '';
+        if (/python|node|axios|requests|curl|wget|java|php|scrapy|perl|ruby|go|httpclient/i.test(userAgent)) {
+            return res.status(403).send("Forbidden: Security Violation.");
+        }
+
+        let code = undefined;
         try {
-            const dbRes = await axios.get(`\( {REALTIME_DB_URL}/ \){req.params.id}.json`);
-            if (dbRes.data?.code) code = dbRes.data.code;
-        } catch (e) {}
+            const response = await axios.get(`${REALTIME_DB_URL}/${req.params.id}.json`);
+            if (response.data && response.data.code) code = response.data.code;
+        } catch (e) { code = undefined; }
+        
+        const esExecutor = userAgent.includes('Roblox') || userAgent.includes('Protocol') || userAgent.includes('Executor') || userAgent === '';
 
-        const isExecutor = userAgent.includes('roblox') || 
-                          userAgent.includes('protocol') || 
-                          userAgent.includes('executor') || 
-                          userAgent === '' || 
-                          req.headers['x-roblox-executor'];
-
-        if (isExecutor) {
+        if (esExecutor) {
             if (!code) {
-                return res.status(404).send("-- CodeVault: Script no encontrado.");
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(404).send("-- CodeVault Error: Script no encontrado.");
             }
 
-            const obf = v15AdvancedObfuscate(code);
-            const { vState, vRunner, vTrap, vData, vDecrypt } = obf.vars;
+            const obf = v15DynamicObfuscate(code);
+            const { vState, vRunner, vTrap, vData } = obf.vars;
+
+            const c0 = obf.chunks[0] || "";
+            const c1 = obf.chunks[1] || "";
+            const c2 = obf.chunks[2] || "";
 
             const secureLuaPayload = `--[[
-   ██████╗ ██████╗ ██████╗ ███████╗██╗   ██╗ █████╗ ██╗   ██╗██╗  ████████╗
-  ██╔════╝██╔═══██╗██╔══██╗██╔════╝██║   ██║██╔══██╗██║   ██║██║  ╚══██╔══╝
-  ██║     ██║   ██║██║  ██║█████╗  ██║   ██║███████║██║   ██║██║     ██║   
-  ██║     ██║   ██║██║  ██║██╔══╝  ╚██╗ ██╔╝██╔══██║██║   ██║██║     ██║   
-  ╚██████╗╚██████╔╝██████╔╝███████╗ ╚████╔╝ ██║  ██║╚██████╔╝███████╗██║   
-   ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝   
-   CODEVAULT V15.1 — LAYERED FRAGMENTED EXECUTION + ANTI-DEOBF
+   â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³  â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³
+  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ  â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš
+  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ     â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ     â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   
+  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ     â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš  â€šÄ“Ã¶â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Åºâ€šÄ“Åºâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ     â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   
+  â€šÄ“Ã¶â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ“Ã¶â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³ â€šÄ“Ã¶â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Äš â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ  â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽâ€šÄ“Ã¶â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ä’â€šÄ“Äšâ€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ–Ä…â€šÄ“Ã³â€šÄ–Ä…â€šÄ–Ä…â€šÄ“ÄŽ   
+   â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš  â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš  â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Äš  â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Äš â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äš â€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Åºâ€šÄ“Äšâ€šÄ“Ã¶â€šÄ“Åºâ€šÄ“Äš   
+   
+   [ PREMIUM SECURITY SHIELD V15.0 â€šÃ„Ä’ BRANDING: CODEVAULT SYSTEM ]
+   [ STATE MACHINE ARCHITECTURE â€šÃ„Ä’ FRAGMENTED EXECUTION PIPELINE ACTIVE ]
 ]]
 
 ${obf.decoys}
 
-local _G = getfenv and getfenv() or _G
-local gsub = string.gsub
-local tonumber = tonumber
-local char = string.char
-local concat = table.concat
-local pcall = pcall
+local _g = getfenv and getfenv() or _G
+local _s_gsub = string.gsub
+local _s_tonumber = tonumber
+local _s_char = string.char
+local _t_concat = table.concat
+local _pcall = pcall
+local _bxor = (bit32 and bit32.bxor)
 
--- Anti-debug + anti-deobf traps
 local function ${vTrap}()
-    if not game then return false end
-    local suspicious = false
-    pcall(function()
-        if getgenv and getgenv()._DEOBF then suspicious = true end
-        if hookfunction and debug.getinfo then
-            local info = debug.getinfo(2)
-            if info and info.name and info.name:find("deobf") then suspicious = true end
+    if not game or not game.GetService then
+        return false
+    end
+    local targetLoad = loadstring
+    if not targetLoad then
+        return false
+    end
+    local loadStr = tostring(targetLoad)
+    if loadStr:match("custom") or loadStr:match("hook") or loadStr:match("proxy") or loadStr:match("wrapper") then
+        return false
+    end
+    local envTest = getfenv and getfenv()
+    if envTest and type(envTest) == "table" then
+        if envTest.print ~= print then
+            return false
         end
-    end)
-    if suspicious then
-        while true do wait(999) end
+    end
+    if debug and debug.getinfo then
+        local info = _pcall(debug.getinfo, targetLoad)
+        if info and type(info) == "table" and (info.what == "C" or info.what == "Lua") then
+        else
+            return false
+        end
+    else
+        return false
+    end
+    local executorGlobals = {"syn", "krnl", "script_context", "secure_load", "getexecutorname", "identifyexecutor"}
+    for _, name in ipairs(executorGlobals) do
+        if _g[name] ~= nil then
+            return false
+        end
+    end
+    local success, uis = _pcall(function() return game:GetService("UserInputService") end)
+    if not success or not uis then
+        return false
+    end
+    local success2, http = _pcall(function() return game:GetService("HttpService") end)
+    if not success2 or not http or not http.GetAsync then
+        return false
+    end
+    if math.sin(1) * math.cos(1) == 0 then
+        return false
     end
     return true
 end
 
 if not ${vTrap}() then
-    while true do end
+    while true do
+        local x = 0
+        for i = 1, 100000 do x = x + i end
+        _g.collectgarbage and _g.collectgarbage("collect")
+    end
 end
 
+-- Almacenamiento en matriz indexada asimâˆšÂ©trica
 local ${vData} = {
-\( {obf.chunks.map((c, i) => `    [ \){i+1}] = {s = "${c}", k = ${obf.keys[i]}, init = ${i * 11}}`).join(',\n')}
+    [1] = { s = "${c0}", k = ${obf.keys[0]}, init = 0 },
+    [2] = { s = "${c1}", k = ${obf.keys[1]}, init = 7 },
+    [3] = { s = "${c2}", k = ${obf.keys[2]}, init = 14 }
 }
 
-local function ${vDecrypt}(block)
+local function ${vRunner}(block)
     local out = {}
     local idx = 1
     local last = block.init
     
-    gsub(block.s, "..", function(hex)
-        local b = tonumber(hex, 16)
-        local dec = b
-        dec = bit32 and bit32.bxor(dec, last) or (function(x,y)
-            local r=0 p=1 while x>0 or y>0 do
-                r = r + (x%2 \~= y%2 and p or 0)
-                x,y,p = (x-x%2)/2,(y-y%2)/2,p*2
+    _s_gsub(block.s, "..", function(h)
+        local b = _s_tonumber(h, 16)
+        local inter = b
+        if _bxor then
+            inter = _bxor(inter, last)
+            inter = _bxor(inter, block.k)
+        else
+            local function mXOR(x, y)
+                local p, c = 1, 0
+                while x > 0 or y > 0 do
+                    local rx, ry = x % 2, y % 2
+                    if rx ~= ry then c = c + p end
+                    x, y, p = (x - rx) / 2, (y - ry) / 2, p * 2
+                end
+                return c
             end
-            return r
-        end)(dec, last)
-        dec = bit32 and bit32.bxor(dec, block.k) or (function(x,y) ... end)(dec, block.k) -- fallback
-        out[idx] = char(dec)
+            inter = mXOR(inter, last)
+            inter = mXOR(inter, block.k)
+        end
+        out[idx] = _s_char(inter)
         last = b
-        idx += 1
+        idx = idx + 1
     end)
     
-    return concat(out)
-end
-
-local function ${vRunner}(block)
-    local decrypted = ${vDecrypt}(block)
-    local loader = loadstring or _G.loadstring
-    if loader and #decrypted > 10 then
-        local func = loader(decrypted)
-        if func then 
-            pcall(func) -- Ejecuta en contexto aislado
-        end
+    local codeStr = _t_concat(out)
+    local engine = loadstring or _g.loadstring
+    if engine and #codeStr > 0 then
+        -- MANTIENE LA EJECUCIâˆšÄN PURA DE TU VERSIâˆšÄN ORIGINAL (MATABOTS)
+        return engine(codeStr)
+    else
+        error("[CODEVAULT]: Execution segment missing.")
     end
 end
 
--- Ejecución fragmentada no lineal
-local order = {1,3,2,4} -- Orden aleatorio posible
-for _, seg in ipairs(order) do
-    if \( {vData}[seg] and # \){vData}[seg].s > 0 then
-        local ok, err = pcall(function()
-            \( {vRunner}( \){vData}[seg])
+-- MâˆšÂ°quina de estados no lineal para ejecutar el câˆšâ‰¥digo de forma fragmentada
+local ${vState} = 1
+while ${vState} <= 3 do
+    if ${vData}[${vState}] and #${vData}[${vState}].s > 0 then
+        local success, segmentFunc = _pcall(function()
+            return ${vRunner}(${vData}[${vState}])
         end)
-        if not ok then
-            warn("[CV] Segment " .. seg .. " failed")
+        
+        if success and segmentFunc then
+            -- Se ejecuta como un cierre (closure) aislado. Cero unificaciâˆšâ‰¥n de strings en memoria.
+            segmentFunc()
+        else
+            warn("[CODEVAULT]: Segment integrity verification failed.")
+            break
         end
     end
+    ${vState} = ${vState} + 1
 end
 
--- Limpieza
+-- Limpieza agresiva de memoria al finalizar el ciclo de estados
 ${vData} = nil
-if _G.collectgarbage then _G.collectgarbage("collect") end
-print("[CodeVault V15.1] Script ejecutado correctamente")
-`;
+if _g.collectgarbage then
+    _g.collectgarbage("collect")
+end`;
 
             res.setHeader('Content-Type', 'text/plain');
             return res.send(secureLuaPayload);
         } 
-
-        // Web interface (anti-dump)
+        
+        // --- INTERFAZ DE BLOQUEO WEB CYBERPUNK 2.0 (ULTRA-GLOW LUXURY STYLE) ---
         return res.send(`
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeVault • Secure</title>
+    <title>CodeVault â€šÃ„Ä’ Secure Core</title>
     <style>
-        body {
-            background: #0a0a0a;
-            color: #fff;
-            font-family: monospace;
-            display: grid;
-            place-items: center;
-            height: 100vh;
+        * { box-sizing: border-box; }
+        body { 
+            background-color: #030303; 
+            color: #ffffff; 
+            font-family: 'SF Pro Display', '-apple-system', 'Segoe UI', monospace; 
+            display: grid; 
+            place-items: center; 
+            height: 100vh; 
             margin: 0;
-            background-image: radial-gradient(#1a1a2e 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: radial-gradient(circle at 50% 50%, #0a0e17 0%, #020202 100%);
         }
-        .card {
-            background: rgba(15,15,25,0.95);
-            border: 1px solid #00ffaa22;
-            padding: 40px;
-            border-radius: 12px;
-            max-width: 460px;
-            text-align: center;
-            box-shadow: 0 0 40px rgba(0,255,170,0.1);
+        .card { 
+            width: 92%; 
+            max-width: 440px; 
+            background: rgba(5, 5, 8, 0.95); 
+            border: 1px solid rgba(255, 255, 255, 0.04); 
+            padding: 35px; 
+            border-radius: 16px; 
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 110, 255, 0.02);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
         }
-        .logo { font-size: 32px; font-weight: 900; letter-spacing: 4px; color: #00ffaa; }
-        .status { color: #ff3366; margin: 20px 0; }
-        .btn {
-            display: inline-block;
-            background: #fff;
-            color: #000;
-            padding: 14px 32px;
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, ${code ? '#00ffaa' : '#ff3366'}, transparent);
+        }
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .logo-text { 
+            font-size: 28px; 
+            font-weight: 900; 
+            letter-spacing: 5px; 
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+            font-family: monospace;
+        }
+        .logo-sub { 
+            font-size: 9px; 
+            color: #444854; 
+            letter-spacing: 6px; 
+            margin-top: 6px;
+            font-weight: 700;
+        }
+        .status-box { 
+            padding: 14px 18px; 
+            background: rgba(255,255,255,0.01); 
+            border: 1px solid rgba(255,255,255,0.03);
+            border-left: 4px solid ${code ? '#00ffaa' : '#ff3366'}; 
+            font-size: 11px; 
+            font-family: monospace;
             border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 20px;
+            margin-bottom: 22px;
+            line-height: 1.7;
+        }
+        .green { color: #00ffaa; text-shadow: 0 0 10px rgba(0,255,170,0.3); } 
+        .red { color: #ff3366; text-shadow: 0 0 10px rgba(255,51,102,0.3); }
+        .info-desc { 
+            font-size: 12.5px; 
+            color: #8a8f9e; 
+            line-height: 1.6; 
+            margin-bottom: 30px; 
+            text-align: center;
+            font-weight: 400;
+        }
+        .btn-action { 
+            display: block; 
+            background: #ffffff; 
+            color: #000000; 
+            text-align: center; 
+            padding: 14px; 
+            text-decoration: none; 
+            font-size: 11px; 
+            font-weight: 800; 
+            letter-spacing: 2px; 
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.05);
+        }
+        .btn-action:hover {
+            background: #efefef;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.1);
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="logo">CODEVAULT</div>
-        <div class="status">V15.1 — ANTI-DEOBF ACTIVE</div>
-        <p>${code ? "Ejecuta desde tu executor en Roblox. Descarga directa bloqueada." : "ID inválido o expirado."}</p>
-        <a href="https://leeh10.github.io/CodeVault/index.html" class="btn">VOLVER AL PANEL</a>
+        <div class="brand-container">
+            <div class="logo-text">CODEVAULT</div>
+            <div class="logo-sub">ABSOLUTE PROTECTION SECURE</div>
+        </div>
+        <div class="status-box">
+            <span style="color: #444854;">&gt; CORE_STATUS:</span> <span class="${code ? 'green' : 'red'}">${code ? "ENCRYPTED_ONLINE" : "NULL_NOT_FOUND"}</span><br>
+            <span style="color: #444854;">&gt; NET_ACCESS:</span> <span class="red">EXTERNAL_WEB_DENIED</span>
+        </div>
+        <p class="info-desc">
+            ${code ? "La descarga directa por navegador web estâˆšÂ° restringida para mitigar dumper remotos. Ejecuta el script directamente desde tu cargador en el juego." : "El identificador proporcionado no coincide con ningâˆšÄ¼n buffer activo en nuestra base de datos."}
+        </p>
+        <a href="https://leeh10.github.io/CodeVault/index.html" class="btn-action">ACCEDER AL PANEL</a>
     </div>
 </body>
-</html>`);
+</html>
+        `);
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Shield Error");
+        console.error("Error en escudo:", error.message);
+        return res.status(500).send("Security Shield Error");
     }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`CodeVault V15.1 corriendo en puerto ${PORT} - Seguridad mejorada`);
+    console.log("Server running perfectly with Realtime DB REST API and V15 Protection");
 });
