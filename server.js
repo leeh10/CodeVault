@@ -71,6 +71,7 @@ app.get("/web/raw/:id", async (req, res) => {
 
 // --- MOTOR DE OFUSCACIÓN AVANZADA CODEVAULT V15 (FRAGMENTED STATE PIPELINE) ---
 function v15DynamicObfuscate(code) {
+    // Dividir el código de entrada en múltiples segmentos lógicos antes de cifrar
     const segments = [];
     const size = Math.ceil(code.length / 3);
     for (let i = 0; i < code.length; i += size) {
@@ -81,6 +82,7 @@ function v15DynamicObfuscate(code) {
     const keys = [primaryKey, primaryKey ^ 0xAA, primaryKey ^ 0x55];
     const encryptedChunks = [];
 
+    // Cifrar cada segmento de manera independiente con llaves derivadas
     segments.forEach((seg, idx) => {
         const buf = Buffer.from(seg, 'utf8');
         const chunkData = [];
@@ -99,6 +101,7 @@ function v15DynamicObfuscate(code) {
     const vRunner = randomVar();
     const vTrap = randomVar();
     const vData = randomVar();
+    const vBuffer = randomVar();
 
     let decoyData = "";
     for(let i = 0; i < 8; i++) {
@@ -109,12 +112,12 @@ function v15DynamicObfuscate(code) {
     return {
         chunks: encryptedChunks,
         keys: keys,
-        vars: { vState, vRunner, vTrap, vData },
+        vars: { vState, vRunner, vTrap, vData, vBuffer },
         decoys: decoyData
     };
 }
 
-// RUTA PRINCIPAL CON SISTEMA DE PROTECCIÓN CAPA V15 (CORREGIDA AL 100%)
+// RUTA PRINCIPAL CON SISTEMA DE PROTECCIÓN CAPA V15 REESTRUCTURADA Y GARANTIZADA
 app.get("/raw/:id", async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'] || '';
@@ -137,8 +140,9 @@ app.get("/raw/:id", async (req, res) => {
             }
 
             const obf = v15DynamicObfuscate(code);
-            const { vState, vRunner, vTrap, vData } = obf.vars;
+            const { vState, vRunner, vTrap, vData, vBuffer } = obf.vars;
 
+            // Formatear los bloques cifrados asegurando que no falte ninguno para la ejecución completa
             const c0 = obf.chunks[0] || "";
             const c1 = obf.chunks[1] || "";
             const c2 = obf.chunks[2] || "";
@@ -222,25 +226,21 @@ local function ${vRunner}(block)
         idx = idx + 1
     end)
     
-    local codeStr = _t_concat(out)
-    local engine = loadstring or _g.loadstring
-    if engine and #codeStr > 0 then
-        return engine(codeStr)
-    else
-        error("[CODEVAULT]: Execution segment missing.")
-    end
+    return _t_concat(out)
 end
 
--- Máquina de estados no lineal para ejecutar el código de forma fragmentada
+-- Tubería segura de acumulación de fragmentos en tiempo de ejecución
+local ${vBuffer} = {}
 local ${vState} = 1
+
 while ${vState} <= 3 do
     if ${vData}[${vState}] and #${vData}[${vState}].s > 0 then
-        local success, segmentFunc = _pcall(function()
+        local success, segmentStr = _pcall(function()
             return ${vRunner}(${vData}[${vState}])
         end)
         
-        if success and segmentFunc then
-            segmentFunc()
+        if success and segmentStr and #segmentStr > 0 then
+            ${vBuffer}[${vState}] = segmentStr
         else
             warn("[CODEVAULT]: Segment integrity verification failed.")
             break
@@ -249,10 +249,28 @@ while ${vState} <= 3 do
     ${vState} = ${vState} + 1
 end
 
--- Limpieza agresiva de memoria al finalizar el ciclo de estados
-${vData} = nil
-if _g.collectgarbage then
-    _g.collectgarbage("collect")
+-- Unificación completa y ejecución nativa garantizada sin errores de fragmentos sueltos
+local runtimeScript = _t_concat(${vBuffer})
+${vBuffer} = nil
+
+if runtimeScript and #runtimeScript > 0 then
+    local run = loadstring or _g.loadstring
+    run(runtimeScript)()
+    
+    -- PURGA ULTRA AGRESIVA DE MEMORIA (EVAPORACIÓN ANTI-DUMPER DE LA RAM)
+    if task and task.defer then
+        task.defer(function()
+            runtimeScript = string.rep("\\0", #runtimeScript)
+            runtimeScript = nil
+            ${vData} = nil
+            if _g.collectgarbage then _g.collectgarbage("collect") end
+        end)
+    else
+        runtimeScript = nil
+        ${vData} = nil
+    end
+else
+    error("[CODEVAULT]: Integrity pipeline breakdown.")
 end`;
 
             res.setHeader('Content-Type', 'text/plain');
